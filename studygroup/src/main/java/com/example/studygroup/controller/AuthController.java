@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute; // ⭐ 이 줄이 추가되어야 에러가 안 납니다!
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -38,18 +39,22 @@ public class AuthController {
         return "redirect:/";
     }
 
-    // --- 회원가입 관련 (이 부분이 빠져서 404가 났던 거예요!) ---
+    // --- 회원가입 및 환영 페이지 관련 ---
     @GetMapping("/signup")
     public String signupPage() {
-        return "auth/signup"; // templates/auth/signup.html을 찾아갑니다.
+        return "auth/signup";
     }
 
     @PostMapping("/signup")
-    public String signup(SignupRequest request) {
-        userService.register(request); // 1. DB 저장 (이미 잘 되고 있는 부분)
+    public String signup(@ModelAttribute SignupRequest request) { // ⭐ @ModelAttribute 추가
+        userService.register(request);
+        // 가입 완료 후 환영 페이지(/welcome)로 리다이렉트합니다.
+        return "redirect:/welcome";
+    }
 
-        // 2. 이 부분을 수정하세요!
-        // "redirect:/" 라고 적어야 브라우저가 홈(localhost:8080)으로 다시 접속합니다.
-        return "redirect:/";
+    @GetMapping("/welcome") // ⭐ 환영 페이지 주소 추가
+    public String welcomePage() {
+        // templates/auth/welcome.html 파일을 찾아갑니다.
+        return "auth/welcome";
     }
 }
