@@ -1,4 +1,4 @@
-package com.example.studygroup.service; // 1. 주소(패키지) 선언
+package com.example.studygroup.service;
 
 import com.example.studygroup.domain.User;
 import com.example.studygroup.dto.request.auth.SignupRequest;
@@ -6,33 +6,40 @@ import com.example.studygroup.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDate;
 
-@Service // 2. "이 파일은 서비스 역할을 해"라고 스프링에게 알려줌
-@RequiredArgsConstructor // 3. userRepository를 자동으로 연결
-@Transactional(readOnly = true)
-public class UserService { // 4. 클래스 울타리 시작!
+@Service
+@RequiredArgsConstructor
+public class UserService {
 
     private final UserRepository userRepository;
 
-    @Transactional // 데이터를 저장하는 기능이므로 트랜잭션 적용
+    // --- 로그인 로직 (이 부분이 빠져있어서 에러가 났습니다!) ---
+    public boolean login(String username, String password) {
+        // DB에서 아이디로 유저를 찾고, 비밀번호가 일치하는지 확인합니다.
+        return userRepository.findByUsername(username)
+                .map(user -> user.getPassword().equals(password))
+                .orElse(false);
+    }
+
+    // --- 기존 회원가입 로직 ---
+    @Transactional
     public void register(SignupRequest request) {
-        // 빌더를 사용해 화면에서 받은 데이터를 유저 객체로 만듭니다.
+        LocalDate birthDate = LocalDate.of(
+                request.getBirthYear(),
+                request.getBirthMonth(),
+                request.getBirthDay()
+        );
+
         User user = User.builder()
                 .username(request.getUsername())
-                .password(request.getPassword()) // 실제로는 암호화가 필요해요!
-                .nickname(request.getNickname())
+                .password(request.getPassword())
+                .name(request.getName())
                 .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .birthDate(birthDate)
                 .build();
 
-        userRepository.save(user); // 실제 DB(MySQL)에 저장하는 마법의 주문
+        userRepository.save(user);
     }
-
-    // UserService.java 파일 안에 추가하세요!
-
-    public boolean login(String username, String password) {
-        // 1. DB에서 해당 아이디를 가진 유저를 찾습니다.
-        return userRepository.findByUsername(username)
-                .map(user -> user.getPassword().equals(password)) // 2. 비밀번호가 일치하는지 확인합니다.
-                .orElse(false); // 3. 유저가 없거나 비번이 틀리면 false를 반환합니다.
-    }
-} // 5. 클래스 울타리 끝!
+}
