@@ -8,14 +8,14 @@
     </div>
 
     <div class="header-right" style="display: flex; align-items: center; gap: 15px;">
-      <th:block th:if="${session.loginUser == null}">
-        <a th:href="@{/login}" style="text-decoration: none; color: #333; font-size: 0.9rem; font-weight: 500;">로그인</a>
-        <a th:href="@{/signup}" style="text-decoration: none; color: #333; font-size: 0.9rem; font-weight: 500;">회원가입</a>
+      <th:block th:if="${session.loginUserId == null}">
+        <a th:href="@{/login}"  style="text-decoration: none; color: #333; font-size: 0.9rem; font-weight: 500;">로그인</a>
+        <a th:href="@{/signup}"  style="text-decoration: none; color: #333; font-size: 0.9rem; font-weight: 500;">회원가입</a>
       </th:block>
 
-      <th:block th:if="${session.loginUser != null}">
-        <a th:href="@{/mypage}" style="background-color: #ddd; padding: 6px 16px; text-decoration: none; color: black; border-radius: 4px; font-size: 0.9rem;">my page</a>
-        <a th:href="@{/logout}" style="font-size: 0.8rem; color: #999; text-decoration: none; margin-left: 5px;">로그아웃</a>
+      <th:block th:if="${session.loginUserId != null}">
+        <a th:href="@{/mypage}"  style="background-color: #ddd; padding: 6px 16px; text-decoration: none; color: black; border-radius: 4px; font-size: 0.9rem;">my page</a>
+        <a th:href="@{/logout}"  style="font-size: 0.8rem; color: #999; text-decoration: none; margin-left: 5px;">로그아웃</a>
       </th:block>
     </div>
 

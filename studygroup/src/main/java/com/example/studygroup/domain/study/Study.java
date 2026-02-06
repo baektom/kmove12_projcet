@@ -1,10 +1,12 @@
 package com.example.studygroup.domain.study;
 
+import com.example.studygroup.domain.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -18,14 +20,52 @@ public class Study {
     @Column(nullable = false)
     private String title;
 
-    private int currentParticipants; // 500 에러 해결을 위한 필드
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
+    private int currentParticipants;
 
     private int maxParticipants;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RecruitStatus status = RecruitStatus.RECRUITING; // 기본값: 모집중
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User author; // 작성자
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
     @Builder
-    public Study(String title, int currentParticipants, int maxParticipants) {
+    public Study(String title, String content, int currentParticipants, int maxParticipants, User author) {
         this.title = title;
+        this.content = content;
         this.currentParticipants = currentParticipants;
         this.maxParticipants = maxParticipants;
+        this.author = author;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 비즈니스 로직: 스터디 정보 수정
+    public void update(String title, String content, int maxParticipants) {
+        this.title = title;
+        this.content = content;
+        this.maxParticipants = maxParticipants;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 비즈니스 로직: 모집 상태 변경
+    public void changeStatus(RecruitStatus status) {
+        this.status = status;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 권한 체크: 작성자인지 확인
+    public boolean isAuthor(Long userId) {
+        return this.author.getId().equals(userId);
     }
 }

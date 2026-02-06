@@ -40,6 +40,22 @@
         .search-btn:hover {
             background-color: #1a3ebf;
         }
+        .create-study-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 20px;
+        }
+        .create-study-btn:hover {
+            background-color: #218838;
+        }
         /* 스터디 카드 스타일 */
         .study-grid {
             display: flex;
@@ -53,6 +69,55 @@
             border-radius: 8px;
             text-align: center;
             font-weight: bold;
+        }
+        /* 스터디 리스트 항목 스타일 */
+        .study-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .study-item:hover {
+            background-color: #f8f9fa;
+        }
+        .study-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-decoration: none;
+            color: #333;
+        }
+        .study-title:hover {
+            color: #2b56f5;
+        }
+        .study-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-recruiting {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-closed {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -85,19 +150,30 @@
             <div class="study-card">토익</div>
         </div>
 
-        <h3 style="margin-bottom: 20px; border-bottom: 2px solid #2b56f5; display: inline-block;">전체 보기</h3>
+        <div class="section-header">
+            <h3 style="border-bottom: 2px solid #2b56f5; display: inline-block; margin: 0;">전체 보기</h3>
+            <a th:href="@{/study/create}" class="create-study-btn">+ 스터디 만들기</a>
+        </div>
 
         <div class="study-list" style="margin-top: 10px;">
-            <div th:each="study : ${studyList}"
-                 style="padding: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+            <div th:each="study : ${studyList}" class="study-item"
+                 th:onclick="|location.href='@{/study/{id}(id=${study.id})}'|">
 
-                <span th:text="${study.title}" style="font-size: 1.1rem; font-weight: 500;">스터디 제목</span>
+                <a th:href="@{/study/{id}(id=${study.id})}" 
+                   th:text="${study.title}" 
+                   class="study-title">스터디 제목</a>
 
-                <span style="color: #666; font-size: 0.9rem;">
+                <div class="study-info">
+                    <span class="status-badge"
+                          th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
+                          th:text="${study.status}">모집중</span>
+                    <span>
                         참여인원
                         <span th:text="${study.currentParticipants}" style="color: #2b56f5; font-weight: bold;">0</span> /
                         <span th:text="${study.maxParticipants}">5</span>
                     </span>
+                    <span th:text="${study.authorName}" style="color: #999;">작성자</span>
+                </div>
             </div>
 
             <div th:if="${#lists.isEmpty(studyList)}" style="padding: 50px; text-align: center; color: #999;">
