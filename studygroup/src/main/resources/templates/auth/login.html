@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>STUDY MATE - Login</title>
+  <link rel="stylesheet" th:href="@{/css/login.css}">
+
+</head>
+<body>
+<div class="login-container">
+  <div class="logo-section">
+    <img th:src="@{/img/globe_icon.png}" alt="logo" class="login-logo">
+  </div>
+
+  <form action="/login" method="post" class="login-form">
+    <div class="input-group">
+      <input type="text" name="username" placeholder="아이디" required>
+    </div>
+    <div class="input-group">
+      <input type="password" name="password" placeholder="패스워드" required>
+    </div>
+    <button type="submit" class="login-btn">로그인</button>
+  </form>
+
+
+
+  <div class="auth-links">
+    <a href="#">ID/PW찾기</a>
+    <a href="/signup">회원가입</a>
+  </div>
+</div>
+</body>
+</html>
