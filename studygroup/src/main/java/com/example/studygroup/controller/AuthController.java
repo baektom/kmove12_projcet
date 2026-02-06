@@ -26,11 +26,13 @@ public class AuthController {
     public String login(@RequestParam String username,
                         @RequestParam String password,
                         HttpSession session) {
-        if (userService.login(username, password)) {
-            session.setAttribute("loginUser", username);
-            return "redirect:/";
-        }
-        return "redirect:/login?error";
+
+        return userService.authenticate(username, password)
+            .map(user -> {
+                session.setAttribute("loginUserId", user.getId());
+                return "redirect:/";
+            })
+            .orElse("redirect:/login?error");
     }
 
     @GetMapping("/logout")
@@ -45,12 +47,29 @@ public class AuthController {
         return "auth/signup";
     }
 
+    // 가입 전에 인증 확인 + 성공 후 플래그 삭제
     @PostMapping("/signup")
-    public String signup(@ModelAttribute SignupRequest request) { // ⭐ @ModelAttribute 추가
+    public String signup(@ModelAttribute SignupRequest request, HttpSession session) {
+        Boolean emailVerified = (Boolean) session.getAttribute("emailVerified");
+        String verifiedEmail = (String) session.getAttribute("verifiedEmail");
+
+        if (emailVerified == null || !emailVerified) {
+            return "redirect:/signup?emailNotVerified";
+        }
+        if (verifiedEmail == null || !verifiedEmail.equals(request.getEmail())) {
+            return "redirect:/signup?emailMismatch";
+        }
+
         userService.register(request);
-        // 가입 완료 후 환영 페이지(/welcome)로 리다이렉트합니다.
+
+        // ✅ 가입 성공하면 인증 플래그 제거(재사용 방지)
+        session.removeAttribute("emailVerified");
+        session.removeAttribute("verifiedEmail");
+        session.removeAttribute("authEmail");
+
         return "redirect:/welcome";
     }
+
 
     @GetMapping("/welcome") // ⭐ 환영 페이지 주소 추가
     public String welcomePage() {
