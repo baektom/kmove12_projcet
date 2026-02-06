@@ -36,17 +36,21 @@ public class MailController {
      * 2. 인증번호 검증 요청 처리
      * 주소: POST /mail/verify
      */
+
+    /*
+    * verify에서 email까지 검증 + 플래그 저장으로 수정
+    * */
     @PostMapping("/mail/verify")
     public boolean verifyCode(@RequestParam("code") String code, HttpSession session) {
-        // 세션에 저장된 인증번호를 가져옴
         String savedCode = (String) session.getAttribute("authCode");
+        String savedEmail = (String) session.getAttribute("authEmail");
 
         if (savedCode != null && savedCode.equals(code)) {
-            // 인증 성공 시 세션에서 코드 삭제 (1회용)
-            session.removeAttribute("authCode");
+            session.removeAttribute("authCode"); // 1회용
+            session.setAttribute("emailVerified", true);
+            session.setAttribute("verifiedEmail", savedEmail);
             return true;
         }
-
         return false;
     }
 }
