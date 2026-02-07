@@ -10,7 +10,7 @@
       --black: #222222;
       --light-gray: #f0f0f0;
       --radius: 12px;
-      --container-width: 1600px; /* 목록 페이지와 완벽 일치 */
+      --container-width: 1600px;
     }
 
     * { box-sizing: border-box; font-family: 'Noto Sans KR', sans-serif; margin: 0; padding: 0; border: none; }
@@ -23,44 +23,54 @@
 
     .logo-area img { height: 150px; width: auto; display: block; }
     .header-menu { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+
     .menu-btn {
-      background: var(--light-gray); padding: 12px 30px; border-radius: 8px;
-      font-size: 26px; cursor: pointer; min-width: 180px; font-weight: 600;
+      background: transparent; border: 2px solid var(--black); padding: 12px 30px; border-radius: 8px;
+      font-size: 26px; cursor: pointer; min-width: 180px; font-weight: 600; color: var(--black);
     }
 
     .main-content-wrapper {
       width: var(--container-width); margin: 0 auto 60px auto;
-      background: linear-gradient(rgba(255,255,255,0.75), rgba(255,255,255,0.75)), url('https://via.placeholder.com/1600x900/ffffff/000000');
+      background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');
       background-size: cover; border-radius: var(--radius);
       padding: 80px; display: flex; flex-direction: column; gap: 60px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.05);
     }
 
-    .study-title { font-size: 64px; font-weight: 800; line-height: 1.1; }
-    .study-hashtags { font-size: 34px; color: #444; font-weight: 500; }
+    .study-title { font-size: 64px; font-weight: 800; line-height: 1.1; color: var(--black); }
 
-    .description-box { background: rgba(255, 255, 255, 0.6); padding: 60px; border-radius: var(--radius); }
+    /* 해시태그 색상 검정색으로 수정 */
+    .study-hashtags { font-size: 34px; color: var(--black); font-weight: 500; margin-top: 10px; }
+
+    .description-box { background: rgba(255, 255, 255, 0.9); padding: 60px; border-radius: var(--radius); border: 1px solid #eee; }
     .description-box h3 { font-size: 40px; border-bottom: 4px solid var(--black); padding-bottom: 20px; margin-bottom: 30px; }
-    .description-box p { line-height: 1.8; font-size: 32px; }
+    .description-box p { line-height: 1.8; font-size: 32px; white-space: pre-wrap; }
 
     .action-section { display: flex; gap: 60px; align-items: flex-end; }
     .creator-info {
       display: flex; align-items: center; gap: 40px; flex: 1; height: 180px;
-      background: rgba(255, 255, 255, 0.7); padding: 40px 50px; border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.9); padding: 40px 50px; border-radius: var(--radius);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
     .profile-img { width: 100px; height: 100px; background: var(--black); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 60px; }
     .creator-text b { font-size: 34px; display: block; margin-bottom: 8px; }
     .creator-text span { font-size: 28px; color: #555; }
 
     .participation-group { display: flex; flex-direction: column; gap: 20px; width: 450px; }
-    .info-bar { background: rgba(255, 255, 255, 0.8); border-radius: var(--radius); height: 80px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 600; }
+
+    .info-bar {
+      background: transparent; border: 2px solid var(--black); color: var(--black);
+      border-radius: var(--radius); height: 80px; display: flex; align-items: center;
+      justify-content: center; font-size: 30px; font-weight: 600;
+    }
 
     .btn-join {
-      width: 100%; height: 110px; background: var(--white); color: var(--black);
-      border-radius: var(--radius); font-size: 36px; font-weight: 700; cursor: pointer;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1); transition: 0.2s;
+      width: 100%; height: 110px; background: transparent; color: var(--black);
+      border: 3px solid var(--black); border-radius: var(--radius);
+      font-size: 36px; font-weight: 700; cursor: pointer;
+      transition: 0.2s;
     }
-    .btn-join:hover { background: #f8f8f8; transform: translateY(-5px); }
+    .btn-join:hover { background: rgba(0,0,0,0.05); transform: translateY(-5px); }
   </style>
 </head>
 <body>
@@ -71,22 +81,31 @@
     <button class="menu-btn">게시물 작성</button>
   </div>
 </header>
+
 <div class="main-content-wrapper">
   <div class="banner-text">
-    <h1 class="study-title" th:text="${title}">제목 표시 영역</h1>
-    <p class="study-hashtags">#일본어 #비즈니스일본어 #JLPT #일상회화</p>
+    <h1 class="study-title" th:text="${post.title}">제목 표시 영역</h1>
+    <p class="study-hashtags" th:text="${post.hashtags}">#해시태그</p>
   </div>
+
   <div class="description-box">
     <h3>스터디 상세 설명</h3>
-    <p th:text="${content}">내용이 출력됩니다.</p>
+    <p th:text="${post.content}">내용이 출력됩니다.</p>
   </div>
+
   <div class="action-section">
     <div class="creator-info">
       <div class="profile-img">👤</div>
-      <div class="creator-text"><b>개설자: 스시타베타이</b><span>ID: aaa111</span></div>
+      <div class="creator-text">
+        <b>개설자: <span th:text="${post.creatorName}">이름</span></b>
+        <span>ID: <span th:text="${post.creatorId}">아이디</span></span>
+      </div>
     </div>
+
     <div class="participation-group">
-      <div class="info-bar">참여인원: 4 / 5</div>
+      <div class="info-bar">
+        참여인원: <span th:text="${post.currentPeople}">0</span> / <span th:text="${post.maxPeople}">5</span>
+      </div>
       <button class="btn-join">지금 참여하기</button>
     </div>
   </div>

@@ -79,8 +79,11 @@
     </div>
   </aside>
   <main class="content">
-    <a th:each="s, iterStat : ${studies}" th:if="${iterStat.count <= 4}" th:href="@{/study/{id}(id=${iterStat.count})}" class="study-card">
-      <div class="card-left"><div class="red-circle"></div><span class="study-name" th:text="${s}">스터디 제목</span></div>
+    <a th:each="s : ${studies}" th:href="@{/study/{id}(id=${s.id})}" class="study-card">
+      <div class="card-left">
+        <div class="red-circle"></div>
+        <span class="study-name" th:text="${s.title}">스터디 제목</span>
+      </div>
       <div class="star-icon">★</div>
     </a>
   </main>
