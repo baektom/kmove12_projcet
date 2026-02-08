@@ -72,17 +72,32 @@
         .button-group {
             display: flex;
             gap: 10px;
+            align-items: center; /* ✅ 추가 */
         }
         .btn {
+            display: inline-flex;        /* ✅ a/button 동일하게 박스 정렬 */
+            align-items: center;
+            justify-content: center;
+
             padding: 10px 20px;
             border: none;
             border-radius: 8px;
+
             font-weight: 600;
+            font-size: 14px;             /* ✅ 폰트 크기 고정 */
+            line-height: 1;              /* ✅ 높이 계산 차이 제거 */
+            box-sizing: border-box;      /* ✅ padding 포함 계산 */
+
             cursor: pointer;
             transition: all 0.2s;
             text-decoration: none;
-            display: inline-block;
         }
+        button.btn {
+            appearance: none;
+            -webkit-appearance: none;
+            background-clip: padding-box;
+        }
+
         .btn-primary {
             background-color: #2b56f5;
             color: white;
@@ -161,6 +176,7 @@
         <div class="detail-header">
             <h1 class="detail-title" th:text="${study.title}">스터디 제목</h1>
             <div class="detail-meta">
+                <span>조회수 <b th:text="${study.viewCount}">0</b></span>  // 조회수 표시
                 <span class="status-badge" 
                       th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
                       th:text="${study.status}">모집중</span>
@@ -194,7 +210,7 @@
 
         <div class="detail-footer">
             <div class="button-group">
-                <a th:href="@{/}" class="btn btn-back">목록으로</a>
+                <a th:href="@{/studies}" class="btn btn-back">목록으로</a>
             </div>
             
             <div class="button-group" th:if="${isAuthor}">
@@ -207,9 +223,14 @@
                 </form>
                 
                 <!-- 수정/삭제 버튼 -->
-                <a th:href="@{/study/{id}/edit(id=${study.id})}" class="btn btn-edit">수정</a>
-                <form th:action="@{/study/{id}/delete(id=${study.id})}" method="post" 
+                <form th:action="@{/study/{id}/edit(id=${study.id})}" method="get" style="display:inline;">
+                    <button type="submit" class="btn btn-edit">수정</button>
+                </form>
+
+
+                <form th:action="@{/study/{id}/delete(id=${study.id})}" method="post"
                       onsubmit="return confirm('정말 삭제하시겠습니까?');" style="display: inline;">
+                    <input type="hidden" name="returnUrl" th:value="${returnUrl}">
                     <button type="submit" class="btn btn-delete">삭제</button>
                 </form>
             </div>
