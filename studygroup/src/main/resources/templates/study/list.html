@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>전체보기 - STUDY MATE</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header th:replace="~{layout/header :: header}"></header>
+
+<main class="container" style="max-width:1000px; margin:0 auto; padding:20px;">
+  <h2 style="margin:20px 0;">전체 스터디룸</h2>
+
+  <!-- 검색 -->
+  <form th:action="@{/studies}" method="get" style="display:flex; gap:10px; margin:20px 0;">
+    <input type="text" name="q" th:value="${q}" placeholder="제목으로 검색"
+           style="flex:1; padding:12px 16px; border:2px solid #e9ecef; border-radius:10px;">
+    <button type="submit"
+            style="padding:12px 24px; border:none; border-radius:10px; background:#2b56f5; color:#fff; font-weight:700;">
+      검색
+    </button>
+  </form>
+
+  <!-- 키워드 필터 -->
+  <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+    <a th:href="@{/studies(q=${q})}"
+       style="padding:8px 14px; border-radius:20px; background:#f1f3f5; text-decoration:none; color:#333; font-weight:700;">
+      전체
+    </a>
+    <a th:each="k : ${keywordList}"
+       th:href="@{/studies(keywordId=${k.id}, q=${q})}"
+       th:text="${k.name}"
+       th:style="|padding:8px 14px; border-radius:20px; text-decoration:none; font-weight:700;
+                 background:${selectedKeywordId}==${k.id} ? '#2b56f5' : '#f1f3f5';
+                 color:${selectedKeywordId}==${k.id} ? '#fff' : '#333';|">
+    </a>
+  </div>
+
+  <!-- 스터디 만들기 -->
+  <div style="display:flex; justify-content:flex-end; margin:10px 0 20px;">
+    <a th:href="@{/study/create}"
+       style="padding:12px 20px; border-radius:30px; background:#28a745; color:#fff; text-decoration:none; font-weight:800;">
+      + 스터디 만들기
+    </a>
+  </div>
+
+  <!-- 목록 -->
+  <div th:each="study : ${studyList}"
+       style="padding:16px; border-bottom:1px solid #eee; cursor:pointer;"
+       th:onclick="|location.href='@{/study/{id}(id=${study.id})}'|">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <b th:text="${study.title}">제목</b>
+      <span style="color:#666;">조회수 <b th:text="${study.viewCount}">0</b></span>
+    </div>
+    <div style="margin-top:8px; color:#666; display:flex; gap:16px; align-items:center;">
+      <span th:text="${study.status}">모집중</span>
+      <span>인원 <b th:text="${study.currentParticipants}">1</b>/<span th:text="${study.maxParticipants}">5</span></span>
+      <span th:text="${study.authorName}">작성자</span>
+    </div>
+  </div>
+
+  <div th:if="${#lists.isEmpty(studyList)}" style="padding:50px; text-align:center; color:#999;">
+    검색 결과가 없습니다.
+  </div>
+
+  <!-- Pagination -->
+  <div th:if="${studyPage.totalPages > 1}"
+       style="display:flex; justify-content:center; margin:30px 0;">
+    <div style="display:flex; gap:6px;">
+
+      <!-- 처음 -->
+      <a th:href="@{/studies(page=0, keywordId=${selectedKeywordId}, q=${q})}"
+         style="padding:8px 12px; border:1px solid #ddd; text-decoration:none;">«</a>
+
+      <!-- 이전 -->
+      <a th:if="${studyPage.hasPrevious()}"
+         th:href="@{/studies(page=${studyPage.number - 1}, keywordId=${selectedKeywordId}, q=${q})}"
+         style="padding:8px 12px; border:1px solid #ddd; text-decoration:none;">‹</a>
+
+      <!-- 페이지 번호 -->
+      <a th:each="i : ${#numbers.sequence(0, studyPage.totalPages - 1)}"
+         th:href="@{/studies(page=${i}, keywordId=${selectedKeywordId}, q=${q})}"
+         th:text="${i + 1}"
+         th:style="|padding:8px 12px; border:1px solid #ddd; text-decoration:none;
+                 background:${i}==${studyPage.number} ? '#2b56f5' : 'white';
+                 color:${i}==${studyPage.number} ? 'white' : 'black';|">
+      </a>
+
+      <!-- 다음 -->
+      <a th:if="${studyPage.hasNext()}"
+         th:href="@{/studies(page=${studyPage.number + 1}, keywordId=${selectedKeywordId}, q=${q})}"
+         style="padding:8px 12px; border:1px solid #ddd; text-decoration:none;">›</a>
+
+      <!-- 마지막 -->
+      <a th:href="@{/studies(page=${studyPage.totalPages - 1}, keywordId=${selectedKeywordId}, q=${q})}"
+         style="padding:8px 12px; border:1px solid #ddd; text-decoration:none;">»</a>
+
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

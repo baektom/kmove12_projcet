@@ -1,12 +1,16 @@
 package com.example.studygroup.domain.study;
 
 import com.example.studygroup.domain.User;
+import com.example.studygroup.domain.keyword.StudyKeyword;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -24,8 +28,11 @@ public class Study {
     private String content;
 
     private int currentParticipants;
-
     private int maxParticipants;
+
+    // ✅ 조회수 추가
+    @Column(nullable = false)
+    private int viewCount = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -36,8 +43,11 @@ public class Study {
     private User author; // 작성자
 
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
+
+    // ✅ 키워드 연결(중간 엔티티)
+    @OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudyKeyword> studyKeywords = new ArrayList<>();
 
     @Builder
     public Study(String title, String content, int currentParticipants, int maxParticipants, User author) {
@@ -67,5 +77,10 @@ public class Study {
     // 권한 체크: 작성자인지 확인
     public boolean isAuthor(Long userId) {
         return this.author.getId().equals(userId);
+    }
+
+    // ✅ 조회수 증가
+    public void increaseViewCount() {
+        this.viewCount++;
     }
 }

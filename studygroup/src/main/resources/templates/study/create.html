@@ -105,6 +105,82 @@
             </div>
 
             <div class="form-group">
+                <label class="form-label">키워드 선택</label>
+
+                <!-- 드롭다운: 클릭으로 추가 -->
+                <select id="keywordSelect"
+                        style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                    <option value="">키워드를 선택하세요</option>
+                    <option th:each="k : ${keywordList}" th:value="${k.id}" th:text="${k.name}"></option>
+                </select>
+
+                <!-- 선택된 키워드 칩 표시 영역 -->
+                <div id="selectedKeywords"
+                     style="margin-top:12px; display:flex; flex-wrap:wrap; gap:10px;">
+                </div>
+
+                <p class="help-text">키워드를 클릭하면 아래에 추가되며, X로 삭제할 수 있어요.</p>
+            </div>
+
+            <script>
+                (function () {
+                  const selectEl = document.getElementById('keywordSelect');
+                  const chipsWrap = document.getElementById('selectedKeywords');
+
+                  // 이미 선택된 id를 빠르게 체크하기 위한 Set
+                  const selectedSet = new Set();
+
+                  function addKeyword(id, name) {
+                    if (!id || selectedSet.has(id)) return;
+                    selectedSet.add(id);
+
+                    // 칩 요소
+                    const chip = document.createElement('span');
+                    chip.setAttribute('data-id', id);
+                    chip.style.cssText =
+                      'display:inline-flex; align-items:center; gap:8px; padding:8px 14px;' +
+                      'border-radius:20px; background:#f1f3f5; color:#333; font-weight:700;';
+
+                    const text = document.createElement('span');
+                    text.textContent = name;
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.textContent = '×';
+                    removeBtn.style.cssText =
+                      'border:none; background:transparent; cursor:pointer;' +
+                      'font-size:18px; line-height:1; color:#666;';
+
+                    // hidden input (서버로 keywordIds 전달)
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = 'keywordIds';
+                    hidden.value = id;
+
+                    removeBtn.addEventListener('click', function () {
+                      selectedSet.delete(id);
+                      chip.remove();
+                    });
+
+                    chip.appendChild(text);
+                    chip.appendChild(removeBtn);
+                    chip.appendChild(hidden);
+                    chipsWrap.appendChild(chip);
+                  }
+
+                  selectEl.addEventListener('change', function () {
+                    const id = selectEl.value;
+                    const name = selectEl.options[selectEl.selectedIndex].text;
+
+                    addKeyword(id, name);
+
+                    // 선택 후 다시 "선택하세요"로 돌려서 계속 클릭 추가 가능
+                    selectEl.value = '';
+                  });
+                })();
+            </script>
+
+            <div class="form-group">
                 <label class="form-label" for="maxParticipants">최대 인원 *</label>
                 <input type="number" id="maxParticipants" name="maxParticipants" 
                        class="form-input form-input-small" 

@@ -3,36 +3,61 @@ package com.example.studygroup.controller;
 import com.example.studygroup.domain.study.RecruitStatus;
 import com.example.studygroup.dto.request.study.StudyCreateRequest;
 import com.example.studygroup.dto.request.study.StudyUpdateRequest;
+import com.example.studygroup.service.KeywordService;
 import com.example.studygroup.service.StudyService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+// 페이지로 변경 import문
+import org.springframework.data.domain.Page;
 
 @Controller
 @RequiredArgsConstructor
 public class StudyController {
 
     private final StudyService studyService;
+    private final KeywordService keywordService;
 
+    // ✅ 메인: 조회수 TOP3 + 최신 프리뷰 + 키워드 리스트
     @GetMapping("/")
-    public String home(@RequestParam(value = "keyword", required = false) String keyword, Model model) {
-        if (keyword != null) {
-            System.out.println("사용자가 입력한 검색어: " + keyword);
-        }
-
-        model.addAttribute("studyList", studyService.findAllStudies(keyword));
+    public String home(Model model) {
+        model.addAttribute("featuredStudies", studyService.findFeaturedStudies());
+        model.addAttribute("previewStudies", studyService.findPreviewStudies());
+        model.addAttribute("keywordList", keywordService.findPopularTop5());
         return "study/home";
+    }
+
+    // ✅ 전체보기 페이지(검색/키워드 필터)
+    @GetMapping("/studies")
+    public String studies(@RequestParam(required = false) Long keywordId,
+                          @RequestParam(required = false) String q,
+                          @RequestParam(defaultValue = "0") int page,
+                          Model model) {
+
+        Page<StudyService.StudyDto> studyPage = studyService.searchStudies(keywordId, q, page);
+
+        model.addAttribute("studyPage", studyPage);
+        model.addAttribute("studyList", studyPage.getContent());
+
+        model.addAttribute("keywordList", keywordService.findAll()); // 전체보기에서는 전체 키워드가 더 자연스러움
+        model.addAttribute("selectedKeywordId", keywordId);
+        model.addAttribute("q", q);
+        model.addAttribute("page", page);
+
+        return "study/list";
     }
 
     // 스터디 작성 페이지
     @GetMapping("/study/create")
-    public String createPage(HttpSession session) {
+    public String createPage(HttpSession session, Model model) {
         Long loginUserId = (Long) session.getAttribute("loginUserId");
         if (loginUserId == null) {
             return "redirect:/login";
         }
+        model.addAttribute("keywordList", keywordService.findAll());
         return "study/create";
     }
 
@@ -48,11 +73,14 @@ public class StudyController {
         return "redirect:/study/" + studyId;
     }
 
-    // 스터디 상세 페이지
+    // 스터디 상세 페이지(조회수 +1은 service에서 처리)
     @GetMapping("/study/{id}")
-    public String detail(@PathVariable Long id, Model model, HttpSession session) {
+    public String detail(@PathVariable Long id, Model model, HttpSession session, HttpServletRequest request) {
         StudyService.StudyDetailDto study = studyService.findStudyById(id);
         Long loginUserId = (Long) session.getAttribute("loginUserId");
+
+        String referer = request.getHeader("Referer"); // 이전 페이지
+        model.addAttribute("returnUrl", referer);
 
         model.addAttribute("study", study);
         model.addAttribute("isAuthor", loginUserId != null && loginUserId.equals(study.getAuthorId()));
@@ -98,19 +126,43 @@ public class StudyController {
 
     // 스터디 삭제
     @PostMapping("/study/{id}/delete")
-    public String delete(@PathVariable Long id, HttpSession session) {
+    public String delete(@PathVariable Long id,
+                         @RequestParam(required = false) String returnUrl,
+                         HttpServletRequest request,
+                         HttpSession session) {
+
         Long loginUserId = (Long) session.getAttribute("loginUserId");
-        if (loginUserId == null) {
-            return "redirect:/login";
-        }
+        if (loginUserId == null) return "redirect:/login";
 
         try {
             studyService.deleteStudy(id, loginUserId);
-            return "redirect:/?deleted=true";
+
+            // 1) 파라미터 returnUrl 우선
+            String target = returnUrl;
+
+            // 2) 없으면 referer 헤더 fallback
+            if (target == null || target.isBlank()) {
+                target = request.getHeader("Referer");
+            }
+
+            // 3) 그래도 없으면 기본
+            if (target == null || target.isBlank()) {
+                return "redirect:/studies?deleted=true";
+            }
+
+            // 외부 redirect 방지(간단 버전)
+            if (target.startsWith("http")) {
+                return "redirect:/studies?deleted=true";
+            }
+
+            return "redirect:" + target;
+
         } catch (IllegalStateException e) {
             return "redirect:/study/" + id + "?error=unauthorized";
         }
     }
+
+
 
     // 모집 상태 변경
     @PostMapping("/study/{id}/status")
