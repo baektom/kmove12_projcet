@@ -186,6 +186,81 @@ public class StudyController {
             return "redirect:/study/" + id + "?error=unauthorized";
         }
     }
+
+    // 참가 신청
+    @PostMapping("/study/{id}/apply")
+    public String applyForStudy(@PathVariable Long id, HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            studyMemberService.applyForStudy(id, loginUserId);
+            return "redirect:/study/" + id + "?applied=true";
+        } catch (IllegalStateException e) {
+            return "redirect:/study/" + id + "?error=" + e.getMessage();
+        }
+    }
+
+    // 참가 신청 목록 조회 (작성자용)
+    @GetMapping("/study/{id}/applications")
+    public String viewApplications(@PathVariable Long id, Model model, HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            StudyService.StudyDetailDto study = studyService.findStudyById(id);
+            List<StudyMemberService.StudyMemberDto> pendingMembers = studyMemberService.getPendingMembers(id, loginUserId);
+            List<StudyMemberService.StudyMemberDto> approvedMembers = studyMemberService.getApprovedMembers(id);
+
+            model.addAttribute("study", study);
+            model.addAttribute("pendingMembers", pendingMembers);
+            model.addAttribute("approvedMembers", approvedMembers);
+
+            return "study/applications";
+        } catch (IllegalStateException e) {
+            return "redirect:/study/" + id + "?error=unauthorized";
+        }
+    }
+
+    // 참가 승인
+    @PostMapping("/study/member/{memberId}/approve")
+    public String approveMember(@PathVariable Long memberId,
+                                @RequestParam Long studyId,
+                                HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            studyMemberService.approveMember(memberId, loginUserId);
+            return "redirect:/study/" + studyId + "/applications?approved=true";
+        } catch (Exception e) {
+            return "redirect:/study/" + studyId + "/applications?error=" + e.getMessage();
+        }
+    }
+
+    // 참가 거부
+    @PostMapping("/study/member/{memberId}/reject")
+    public String rejectMember(@PathVariable Long memberId,
+                               @RequestParam Long studyId,
+                               HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            studyMemberService.rejectMember(memberId, loginUserId);
+            return "redirect:/study/" + studyId + "/applications?rejected=true";
+        } catch (Exception e) {
+            return "redirect:/study/" + studyId + "/applications?error=" + e.getMessage();
+        }
+    }
 }
 
 
