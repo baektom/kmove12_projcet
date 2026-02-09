@@ -4,15 +4,16 @@
   <meta charset="UTF-8">
   <title>STUDY MATE - Login</title>
   <link rel="stylesheet" th:href="@{/css/login.css}">
-
 </head>
 <body>
 <div class="login-container">
-  <div class="logo-section">
-    <img th:src="@{/img/globe_icon.png}" alt="logo" class="login-logo">
+  <div class="header-box" style="text-align: center; margin-bottom: 20px;">
+    <a th:href="@{/}" style="text-decoration: none;">
+      <img th:src="@{/img/globe_icon.png}" alt="logo" class="login-logo" style="width: 300px;">
+    </a>
   </div>
 
-  <form action="/login" method="post" class="login-form">
+  <form th:action="@{/login}" method="post" class="login-form">
     <div class="input-group">
       <input type="text" name="username" placeholder="아이디" required>
     </div>
@@ -22,12 +23,23 @@
     <button type="submit" class="login-btn">로그인</button>
   </form>
 
-
-
   <div class="auth-links">
-    <a href="#">ID/PW찾기</a>
-    <a href="/signup">회원가입</a>
+    <a th:href="@{/find-auth}">ID/PW찾기</a>
+    <a th:href="@{/signup}">회원가입</a>
   </div>
 </div>
+
+<script>
+  window.onload = function() {
+      // URL 주소창에서 'error'라는 글자가 있는지 확인합니다.
+      const urlParams = new URLSearchParams(window.location.search);
+
+      // 만약 /login?error 형태로 접속되었다면 알림창을 띄웁니다.
+      if (urlParams.has('error')) {
+          alert("아이디 또는 비밀번호가 틀립니다.");
+      }
+  };
+</script>
+
 </body>
 </html>

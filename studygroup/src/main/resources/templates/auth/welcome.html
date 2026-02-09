@@ -30,12 +30,7 @@
             transition: background 0.3s;
         }
         .start-btn:hover { background-color: #1a3ebf; }
-        .login-link {
-            margin-top: 15px;
-            color: #888;
-            font-size: 0.9rem;
-            text-decoration: none;
-        }
+
     </style>
 </head>
 <body>
@@ -46,10 +41,9 @@
     </div>
 
     <h1 class="welcome-title">환영합니다!</h1>
-    <p style="color: #666; margin-bottom: 40px;">이제 다양한 언어의 스터디 그룹을 찾고 함께 공부를 시작해보세요.</p>
+    <p style="color: #666; margin-bottom: 40px;">이제 다양한 스터디 그룹을 찾고 함께 공부를 시작해보세요.</p>
 
-    <a th:href="@{/}" class="start-btn">지금 바로 시작하기</a>
-    <a th:href="@{/login}" class="login-link">(로그인 화면으로 돌아가기)</a>
+    <a th:href="@{/login}" class="start-btn">로그인 하기</a>
 </div>
 
 </body>

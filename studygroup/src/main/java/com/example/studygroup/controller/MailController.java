@@ -1,31 +1,43 @@
 package com.example.studygroup.controller;
 
 import com.example.studygroup.service.MailService;
+import com.example.studygroup.service.UserService; // UserService 추가
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-@RestController // JSON 형태로 응답을 보내기 위해 @RestController를 사용합니다.
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/mail") // 공통 경로 설정
 public class MailController {
 
     private final MailService mailService;
+    private final UserService userService; // 1. UserService 주입
 
     /**
-     * 1. 인증번호 발송 요청 처리
+     * 1. 인증번호 발송 요청 처리 (가입 정보 검증 로직 포함)
      * 주소: POST /mail/send
      */
-    @PostMapping("/mail/send")
-    public String sendMail(@RequestParam("email") String email, HttpSession session) {
-        // 6자리 난수 생성
-        String code = mailService.createCode();
+    @PostMapping("/send")
+    public String sendMail(@RequestParam String email,
+                           @RequestParam(required = false) String name,
+                           @RequestParam(required = false) String username,
+                           @RequestParam String type,
+                           HttpSession session) {
 
-        // 실제 메일 발송
-        mailService.sendEmail(email, code);
+        // 1. 회원가입(signup)일 때는 이름/아이디 체크를 건너뛰거나 중복만 체크
+        boolean canSend = userService.checkUserExists(type, name, email, username);
 
-        // 생성된 코드를 세션에 저장 (나중에 검증하기 위함)
-        // 3분 동안만 유효하게 설정하고 싶다면 별도의 로직이 필요하지만,
-        // 우선은 세션에 저장하는 기본 방식을 사용합니다.
+        if (!canSend) {
+            // id/pw 찾기 시에는 '정보 없음', signup 시에는 '이미 가입된 이메일' 의미
+            return "not_found";
+        }
+
+        // 3. 가입 정보가 확인된 경우에만 인증번호 생성 및 발송
+        String code = mailService.createCode(); // 6자리 난수 생성
+        mailService.sendEmail(email, code);     // 실제 메일 발송
+
+        // 4. 생성된 코드를 세션에 저장
         session.setAttribute("authCode", code);
         session.setAttribute("authEmail", email);
 
@@ -36,17 +48,13 @@ public class MailController {
      * 2. 인증번호 검증 요청 처리
      * 주소: POST /mail/verify
      */
-
-    /*
-    * verify에서 email까지 검증 + 플래그 저장으로 수정
-    * */
-    @PostMapping("/mail/verify")
+    @PostMapping("/verify")
     public boolean verifyCode(@RequestParam("code") String code, HttpSession session) {
         String savedCode = (String) session.getAttribute("authCode");
         String savedEmail = (String) session.getAttribute("authEmail");
 
         if (savedCode != null && savedCode.equals(code)) {
-            session.removeAttribute("authCode"); // 1회용
+            session.removeAttribute("authCode"); // 1회용 사용 후 삭제
             session.setAttribute("emailVerified", true);
             session.setAttribute("verifiedEmail", savedEmail);
             return true;
