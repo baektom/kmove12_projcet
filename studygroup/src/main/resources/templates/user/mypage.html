@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>마이페이지 - STUDY MATE</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 왼쪽 사이드바 */
+        .sidebar {
+            width: 350px;
+            background-color: #e8e8e8;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-section {
+            width: 150px;
+            height: 150px;
+            background-color: #d0d0d0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 50px;
+            border-radius: 8px;
+        }
+
+        .logo-section img {
+            max-width: 120px;
+            max-height: 120px;
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .my-page-section {
+            width: 100%;
+            text-align: center;
+        }
+
+        .my-page-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .profile-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-color: #555;
+            margin: 0 auto 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-placeholder {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border-radius: 50% 50% 0 0;
+            position: relative;
+        }
+
+        .profile-placeholder::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-radius: 50%;
+            top: -30px;
+            left: 20px;
+        }
+
+        .menu-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        .menu-list li {
+            padding: 15px 20px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-radius: 8px;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .menu-list li:hover {
+            background-color: #d5d5d5;
+        }
+
+        /* 오른쪽 메인 콘텐츠 */
+        .main-content {
+            flex: 1;
+            padding: 50px 80px;
+        }
+
+        .content-header {
+            font-size: 1.3rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .activity-card {
+            background-color: #e0e0e0;
+            padding: 30px 40px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .activity-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .activity-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #d32f2f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .activity-icon-placeholder {
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border-radius: 50% 50% 0 0;
+            position: relative;
+        }
+
+        .activity-icon-placeholder::before {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: white;
+            border-radius: 50%;
+            top: -12px;
+            left: 8px;
+        }
+
+        .activity-speech-bubble {
+            background-color: #4a4a4a;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            position: relative;
+            font-size: 1.1rem;
+            flex: 1;
+        }
+
+        .activity-speech-bubble::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 30px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 15px 20px 15px 0;
+            border-color: transparent #4a4a4a transparent transparent;
+        }
+
+        .input-box {
+            background-color: #d5d5d5;
+            border-radius: 30px;
+            padding: 15px 30px;
+            margin-top: 50px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+
+<header th:replace="~{layout/header :: header}"></header>
+
+<div class="container">
+    <!-- 왼쪽 사이드바 -->
+    <aside class="sidebar">
+        <div class="logo-section">
+            <img th:src="@{/img/globe_icon.png}" alt="로고">
+            <!-- 로고 이미지가 없을 경우를 위한 대체 텍스트 -->
+            <!-- <span class="logo-text">로고</span> -->
+        </div>
+
+        <div class="my-page-section">
+            <h2 class="my-page-title">my page</h2>
+
+            <div class="profile-image">
+                <!-- 나중에 사용자 이미지로 교체될 부분 -->
+                <!-- <img src="사용자이미지경로" alt="프로필 이미지"> -->
+                <div class="profile-placeholder"></div>
+            </div>
+
+            <ul class="menu-list">
+                <li>계정관리</li>
+                <li>채팅</li>
+                <li>My 스터디</li>
+                <li>내가 작성한 글</li>
+                <li>내가 작성한 댓글</li>
+                <li>로그아웃</li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- 오른쪽 메인 콘텐츠 -->
+    <main class="main-content">
+        <div class="content-header">(최근 등록된 댓글)</div>
+
+        <div class="activity-card">
+            <div class="activity-message">
+                <div class="activity-icon">
+                    <div class="activity-icon-placeholder"></div>
+                </div>
+                <div class="activity-speech-bubble">
+                    ○○님이 ○○스터디에서 코멘트를 남겼습니다 (1분 전)
+                    <br><br>
+                    회원님의 활동 시간이 이전보다 늘어났네요.
+                </div>
+            </div>
+        </div>
+
+        <div class="input-box"></div>
+    </main>
+</div>
+
+</body>
+</html>
