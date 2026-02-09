@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>스터디 만들기 - STUDY MATE</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .form-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #2b56f5;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #2b56f5;
+        }
+        .form-textarea {
+            min-height: 200px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .form-input-small {
+            width: 150px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background-color: #2b56f5;
+            color: white;
+            flex: 1;
+        }
+        .btn-primary:hover {
+            background-color: #1a3ebf;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .help-text {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<header th:replace="~{layout/header :: header}"></header>
+
+<main class="container">
+    <div class="form-container">
+        <h2 class="form-title">📝 새 스터디 만들기</h2>
+        
+        <form th:action="@{/study/create}" method="post">
+            <div class="form-group">
+                <label class="form-label" for="title">스터디 제목 *</label>
+                <input type="text" id="title" name="title" class="form-input" 
+                       placeholder="예: 토익 900점 달성 스터디" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="content">스터디 소개 *</label>
+                <textarea id="content" name="content" class="form-textarea" 
+                          placeholder="스터디에 대해 자세히 설명해주세요.&#10;&#10;- 스터디 목표&#10;- 진행 방식&#10;- 참여 조건 등" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">키워드 선택</label>
+
+                <!-- 드롭다운: 클릭으로 추가 -->
+                <select id="keywordSelect"
+                        style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                    <option value="">키워드를 선택하세요</option>
+                    <option th:each="k : ${keywordList}" th:value="${k.id}" th:text="${k.name}"></option>
+                </select>
+
+                <!-- 선택된 키워드 칩 표시 영역 -->
+                <div id="selectedKeywords"
+                     style="margin-top:12px; display:flex; flex-wrap:wrap; gap:10px;">
+                </div>
+
+                <p class="help-text">키워드를 클릭하면 아래에 추가되며, X로 삭제할 수 있어요.</p>
+            </div>
+
+            <script>
+                (function () {
+                  const selectEl = document.getElementById('keywordSelect');
+                  const chipsWrap = document.getElementById('selectedKeywords');
+
+                  // 이미 선택된 id를 빠르게 체크하기 위한 Set
+                  const selectedSet = new Set();
+
+                  function addKeyword(id, name) {
+                    if (!id || selectedSet.has(id)) return;
+                    selectedSet.add(id);
+
+                    // 칩 요소
+                    const chip = document.createElement('span');
+                    chip.setAttribute('data-id', id);
+                    chip.style.cssText =
+                      'display:inline-flex; align-items:center; gap:8px; padding:8px 14px;' +
+                      'border-radius:20px; background:#f1f3f5; color:#333; font-weight:700;';
+
+                    const text = document.createElement('span');
+                    text.textContent = name;
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.textContent = '×';
+                    removeBtn.style.cssText =
+                      'border:none; background:transparent; cursor:pointer;' +
+                      'font-size:18px; line-height:1; color:#666;';
+
+                    // hidden input (서버로 keywordIds 전달)
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = 'keywordIds';
+                    hidden.value = id;
+
+                    removeBtn.addEventListener('click', function () {
+                      selectedSet.delete(id);
+                      chip.remove();
+                    });
+
+                    chip.appendChild(text);
+                    chip.appendChild(removeBtn);
+                    chip.appendChild(hidden);
+                    chipsWrap.appendChild(chip);
+                  }
+
+                  selectEl.addEventListener('change', function () {
+                    const id = selectEl.value;
+                    const name = selectEl.options[selectEl.selectedIndex].text;
+
+                    addKeyword(id, name);
+
+                    // 선택 후 다시 "선택하세요"로 돌려서 계속 클릭 추가 가능
+                    selectEl.value = '';
+                  });
+                })();
+            </script>
+
+            <div class="form-group">
+                <label class="form-label" for="maxParticipants">최대 인원 *</label>
+                <input type="number" id="maxParticipants" name="maxParticipants" 
+                       class="form-input form-input-small" 
+                       min="2" max="50" value="5" required>
+                <p class="help-text">작성자 포함 최소 2명 ~ 최대 50명</p>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary">스터디 만들기</button>
+                <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+</body>
+</html>
