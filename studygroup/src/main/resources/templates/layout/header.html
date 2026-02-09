@@ -1,37 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <header th:fragment="header">
-
-  <style>
-    /* 공통 버튼 베이스 */
-    .blue-btn, .red-btn {
-          padding: 5px 15px;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: bold;
-          font-size: 0.8rem;
-          transition: background 0.3s;
-          color: white;
-          display: inline-block;
-    }
-
-    /* 파란색 버튼 (일반용) */
-    .blue-btn {
-          background-color: #2b56f5;
-    }
-    .blue-btn:hover {
-          background-color: #1a3ebf;
-    }
-
-    /* 빨간색 버튼 (관리자용 - 새로 추가) */
-    .red-btn {
-          background-color: #ff4d4d; /* image_59c3a3.png의 요청 사항 반영 */
-    }
-    .red-btn:hover {
-          background-color: #e60000;
-    }
-  </style>
-
   <div class="header-container" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: #fff; border-bottom: 1px solid #eee;">
 
     <div class="header-left">
@@ -41,22 +10,19 @@
     <div class="header-right" style="display: flex; align-items: center; gap: 10px;">
 
       <th:block th:if="${session.loginUserId == null}">
-        <a th:href="@{/login}" class="blue-btn">로그인</a>
-        <a th:href="@{/signup}" class="blue-btn">회원가입</a>
+        <a th:href="@{/login}" style="text-decoration: none; color: #333; font-size: 0.9rem; font-weight: 500;">로그인</a>
+        <a th:href="@{/signup}" style="text-decoration: none; color: #333; font-size: 0.9rem; font-weight: 500;">회원가입</a>
       </th:block>
 
       <th:block th:if="${session.loginUserId != null}">
+        <a th:if="${session.loginUserRole == 'ADMIN'}" th:href="@{/admin/dashboard}"
+           style="background-color: #ff4d4d; color: white; padding: 6px 16px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 0.8rem;">관리자 페이지</a>
 
-        <a th:if="${session.loginUserRole == 'ADMIN'}"
-           th:href="@{/admin/dashboard}"
-           class="red-btn">관리자 페이지</a>
-
-        <a th:href="@{/mypage}" class="blue-btn">my page</a>
-        <a th:href="@{/logout}" class="blue-btn">로그아웃</a>
+        <a th:href="@{/mypage}" style="background-color: #ddd; padding: 6px 16px; text-decoration: none; color: black; border-radius: 4px; font-size: 0.9rem;">my page</a>
+        <a th:href="@{/logout}" style="font-size: 0.8rem; color: #999; text-decoration: none; margin-left: 5px;">로그아웃</a>
       </th:block>
-
     </div>
-  </div>
 
+  </div>
 </header>
 </html>

@@ -1,7 +1,7 @@
 package com.example.studygroup.service;
 
 import com.example.studygroup.domain.User;
-import com.example.studygroup.domain.UserRole; // UserRole import 필수
+import com.example.studygroup.domain.UserRole;
 import com.example.studygroup.dto.request.auth.SignupRequest;
 import com.example.studygroup.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class UserService {
     }
 
     /**
-     * 회원가입 로직 (특정 계정 관리자 권한 부여 포함)
+     * 회원가입 로직 (아이디 "moon"은 관리자로 등록)
      */
     @Transactional
     public void register(SignupRequest request) {
@@ -38,7 +38,6 @@ public class UserService {
                 request.getBirthDay()
         );
 
-        // 1. 빌더를 통해 유저 객체 생성 (기본 role은 USER)
         User user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -46,20 +45,19 @@ public class UserService {
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
                 .birthDate(birthDate)
-                .role(UserRole.USER) // 기본값 설정
+                .role(UserRole.USER) // 기본 권한
                 .build();
 
-        // 2. 아이디가 "moon"인 경우에만 관리자 권한(ADMIN)으로 변경
+        // ⭐ 관리자 계정 자동 부여 로직
         if ("moon".equals(request.getUsername())) {
             user.setRole(UserRole.ADMIN);
         }
 
-        // 3. 최종적으로 DB에 저장
         userRepository.save(user);
     }
 
     /**
-     * 이름과 이메일로 아이디 찾기
+     * ⭐ [추가됨] 이름과 이메일로 아이디 찾기
      */
     public Optional<String> findUsername(String name, String email) {
         return userRepository.findByNameAndEmail(name, email)
@@ -67,12 +65,13 @@ public class UserService {
     }
 
     /**
-     * 비밀번호 재설정 (보안 강화 버전)
+     * 비밀번호 업데이트 (이전 비밀번호와 동일 여부 체크 포함)
      */
     @Transactional
     public String updatePassword(String username, String newPassword) {
         return userRepository.findByUsername(username)
                 .map(user -> {
+                    // 이전 비밀번호와 같은지 확인
                     if (passwordEncoder.matches(newPassword, user.getPassword())) {
                         return "same_password";
                     }
@@ -83,23 +82,24 @@ public class UserService {
     }
 
     /**
-     * 가입 정보가 실제로 존재하는지 확인 (메일 발송 전 검증용)
+     * 가입 정보 존재 여부 및 이메일 중복 체크
      */
     public boolean checkUserExists(String type, String name, String email, String username) {
-        if ("id".equals(type)) {
+        if ("signup".equals(type)) {
+            // 회원가입 시: 이미 존재하는 이메일인지 체크 (중복 가입 방지)
+            return !userRepository.findByEmail(email).isPresent();
+        } else if ("id".equals(type)) {
+            // ID 찾기 시: 이름과 이메일이 일치하는 계정이 있는지 체크
             return userRepository.findByNameAndEmail(name, email).isPresent();
         } else if ("pw".equals(type)) {
+            // PW 찾기 시: 아이디, 이름, 이메일이 모두 일치하는지 체크
             return userRepository.findByUsernameAndNameAndEmail(username, name, email).isPresent();
-        } else if ("signup".equals(type)) {
-            // 회원가입 시에는 이미 가입된 이메일인지 확인 (중복 가입 방지)
-            // userRepository에 findByEmail 메서드가 없다면 추가가 필요합니다.
-            return !userRepository.findByEmail(email).isPresent();
         }
         return false;
     }
 
     /**
-     * 관리자 권한 부여 메서드 (운영용)
+     * 관리자 권한 부여 (운영용)
      */
     @Transactional
     public void grantAdminRole(String username) {

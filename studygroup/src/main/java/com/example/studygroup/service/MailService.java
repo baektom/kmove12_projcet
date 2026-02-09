@@ -19,6 +19,9 @@ public class MailService {
     // 2. 메일 전송 (image_cffda5.png의 line 24 에러 해결)
     public void sendEmail(String toEmail, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setFrom("loveyoo2015@gmail.com");
+
         message.setTo(toEmail);
         message.setSubject("[STUDY MATE] 회원가입 인증번호입니다.");
         message.setText("인증번호는 [" + code + "] 입니다. 3분 이내에 입력해주세요.");
