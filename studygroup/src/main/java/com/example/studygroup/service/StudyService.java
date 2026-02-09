@@ -70,7 +70,12 @@ public class StudyService {
         Study study = studyRepository.findById(studyId)
             .orElseThrow(() -> new IllegalArgumentException("해당 스터디가 존재하지 않습니다."));
         study.increaseViewCount();
-        return new StudyDetailDto(study);
+
+        List<String> keywordNames =
+            studyKeywordRepository.findKeywordNamesByStudyId(study.getId());
+
+        return new StudyDetailDto(study, keywordNames);
+
     }
 
     @Transactional
@@ -133,6 +138,12 @@ public class StudyService {
         study.changeStatus(status);
     }
 
+    @Transactional(readOnly = true)
+    public List<String> findKeywordNamesByStudyId(Long studyId) {
+        return studyKeywordRepository.findKeywordNamesByStudyId(studyId);
+    }
+
+
     @Getter
     public static class StudyDto {
         private final Long id;
@@ -167,6 +178,8 @@ public class StudyService {
         private final String createdAt;
         private final String updatedAt;
         private final int viewCount;
+        private List<String> keywordNames;
+
 
         public StudyDetailDto(Study study) {
             this.id = study.getId();
@@ -178,10 +191,16 @@ public class StudyService {
             this.authorId = study.getAuthor().getId();
             this.authorName = study.getAuthor().getUsername();
             this.viewCount = study.getViewCount();
-            
+
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             this.createdAt = study.getCreatedAt().format(formatter);
             this.updatedAt = study.getUpdatedAt().format(formatter);
+        }
+
+        // 키워드까지 포함한 생성자
+        public StudyDetailDto(Study study, List<String> keywordNames) {
+            this(study); // 위 생성자 호출
+            this.keywordNames = keywordNames;
         }
     }
 }
