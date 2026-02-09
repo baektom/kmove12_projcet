@@ -28,11 +28,11 @@ public class AuthController {
                         HttpSession session) {
 
         return userService.authenticate(username, password)
-            .map(user -> {
-                session.setAttribute("loginUserId", user.getId());
-                return "redirect:/";
-            })
-            .orElse("redirect:/login?error");
+                .map(user -> {
+                    session.setAttribute("loginUserId", user.getId());
+                    return "redirect:/";
+                })
+                .orElse("redirect:/login?error");
     }
 
     @GetMapping("/logout")
@@ -76,4 +76,9 @@ public class AuthController {
         // templates/auth/welcome.html 파일을 찾아갑니다.
         return "auth/welcome";
     }
+
+//    @GetMapping("/mypage")
+//    public String mypagePage() {
+//        return "user/mypage";
+//    }
 }

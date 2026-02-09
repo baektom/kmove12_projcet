@@ -83,4 +83,14 @@ public class Study {
     public void increaseViewCount() {
         this.viewCount++;
     }
+
+    // 참여자 수 증가
+    public void incrementParticipants() {
+        if (this.currentParticipants >= this.maxParticipants) {
+            throw new IllegalStateException("최대 참여 인원을 초과할 수 없습니다.");
+        }
+        this.currentParticipants++;
+    }
 }
+
+

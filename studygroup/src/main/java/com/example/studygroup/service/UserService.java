@@ -28,7 +28,7 @@ public class UserService {
 
     public Optional<User> authenticate(String username, String rawPassword) {
         return userRepository.findByUsername(username)
-            .filter(user -> passwordEncoder.matches(rawPassword, user.getPassword()));
+                .filter(user -> passwordEncoder.matches(rawPassword, user.getPassword()));
     }
 
     // --- 기존 회원가입 로직 ---
