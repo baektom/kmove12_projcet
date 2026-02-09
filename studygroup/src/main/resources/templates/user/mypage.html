@@ -12,65 +12,44 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .container {
-            display: flex;
-            min-height: 100vh;
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
         }
 
-        /* 왼쪽 사이드바 */
-        .sidebar {
-            width: 350px;
-            background-color: #e8e8e8;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .logo-section {
-            width: 150px;
-            height: 150px;
-            background-color: #d0d0d0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .page-header {
+            text-align: center;
             margin-bottom: 50px;
-            border-radius: 8px;
         }
 
-        .logo-section img {
-            max-width: 120px;
-            max-height: 120px;
-        }
-
-        .logo-text {
-            font-size: 2rem;
+        .page-title {
+            font-size: 2.5rem;
             font-weight: bold;
-            color: #666;
+            color: #2b56f5;
+            margin-bottom: 10px;
         }
 
-        .my-page-section {
-            width: 100%;
+        .profile-section {
+            background-color: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             text-align: center;
         }
 
-        .my-page-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 30px;
-            color: #333;
-        }
-
         .profile-image {
-            width: 200px;
-            height: 200px;
+            width: 150px;
+            height: 150px;
             border-radius: 50%;
             background-color: #555;
-            margin: 0 auto 40px;
+            margin: 0 auto 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            border: 4px solid #e9ecef;
         }
 
         .profile-image img {
@@ -80,8 +59,8 @@
         }
 
         .profile-placeholder {
-            width: 100px;
-            height: 100px;
+            width: 70px;
+            height: 70px;
             background-color: white;
             border-radius: 50% 50% 0 0;
             position: relative;
@@ -90,119 +69,84 @@
         .profile-placeholder::before {
             content: '';
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 42px;
+            height: 42px;
             background-color: white;
             border-radius: 50%;
-            top: -30px;
-            left: 20px;
+            top: -21px;
+            left: 14px;
         }
 
-        .menu-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-        }
-
-        .menu-list li {
-            padding: 15px 20px;
-            margin-bottom: 5px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            border-radius: 8px;
+        .user-name {
+            font-size: 1.8rem;
+            font-weight: bold;
             color: #333;
-            font-size: 1.1rem;
+            margin-bottom: 5px;
         }
 
-        .menu-list li:hover {
-            background-color: #d5d5d5;
-        }
-
-        /* 오른쪽 메인 콘텐츠 */
-        .main-content {
-            flex: 1;
-            padding: 50px 80px;
-        }
-
-        .content-header {
-            font-size: 1.3rem;
+        .user-email {
             color: #666;
-            margin-bottom: 30px;
+            font-size: 1rem;
         }
 
-        .activity-card {
-            background-color: #e0e0e0;
-            padding: 30px 40px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .activity-message {
-            display: flex;
-            align-items: flex-start;
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
+            margin-bottom: 40px;
         }
 
-        .activity-icon {
-            width: 80px;
-            height: 80px;
-            background-color: #d32f2f;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .activity-icon-placeholder {
-            width: 40px;
-            height: 40px;
+        .menu-card {
             background-color: white;
-            border-radius: 50% 50% 0 0;
-            position: relative;
-        }
-
-        .activity-icon-placeholder::before {
-            content: '';
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            background-color: white;
-            border-radius: 50%;
-            top: -12px;
-            left: 8px;
-        }
-
-        .activity-speech-bubble {
-            background-color: #4a4a4a;
-            color: white;
-            padding: 20px 30px;
             border-radius: 12px;
-            position: relative;
-            font-size: 1.1rem;
-            flex: 1;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
 
-        .activity-speech-bubble::before {
-            content: '';
-            position: absolute;
-            left: -20px;
-            top: 30px;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 15px 20px 15px 0;
-            border-color: transparent #4a4a4a transparent transparent;
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
         }
 
-        .input-box {
-            background-color: #d5d5d5;
-            border-radius: 30px;
-            padding: 15px 30px;
-            margin-top: 50px;
-            height: 50px;
+        .menu-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .menu-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .menu-desc {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
@@ -210,55 +154,58 @@
 
 <header th:replace="~{layout/header :: header}"></header>
 
-<div class="container">
-    <!-- 왼쪽 사이드바 -->
-    <aside class="sidebar">
-        <div class="logo-section">
-            <img th:src="@{/img/globe_icon.png}" alt="로고">
-            <!-- 로고 이미지가 없을 경우를 위한 대체 텍스트 -->
-            <!-- <span class="logo-text">로고</span> -->
+<main class="main-container">
+    <div class="page-header">
+        <h1 class="page-title">My Page</h1>
+    </div>
+
+    <!-- 프로필 섹션 -->
+    <div class="profile-section">
+        <div class="profile-image">
+            <img th:if="${user.profileImage != null}" th:src="@{${user.profileImage}}" alt="프로필 이미지">
+            <div th:if="${user.profileImage == null}" class="profile-placeholder"></div>
         </div>
+        <div class="user-name" th:text="${user.name}">사용자 이름</div>
+        <div class="user-email" th:text="${user.email}">user@example.com</div>
+    </div>
 
-        <div class="my-page-section">
-            <h2 class="my-page-title">my page</h2>
+    <!-- 메뉴 그리드 -->
+    <div class="menu-grid">
+        <a th:href="@{/mypage/account}" class="menu-card">
+            <div class="menu-icon">⚙️</div>
+            <div class="menu-title">계정관리</div>
+            <div class="menu-desc">프로필 이미지 및 정보 수정</div>
+        </a>
 
-            <div class="profile-image">
-                <!-- 나중에 사용자 이미지로 교체될 부분 -->
-                <!-- <img src="사용자이미지경로" alt="프로필 이미지"> -->
-                <div class="profile-placeholder"></div>
-            </div>
+        <a th:href="@{/mypage/my-studies}" class="menu-card">
+            <div class="menu-icon">📚</div>
+            <div class="menu-title">My 스터디</div>
+            <div class="menu-desc">내가 참가한 스터디 목록</div>
+        </a>
 
-            <ul class="menu-list">
-                <li>계정관리</li>
-                <li>채팅</li>
-                <li>My 스터디</li>
-                <li>내가 작성한 글</li>
-                <li>내가 작성한 댓글</li>
-                <li>로그아웃</li>
-            </ul>
-        </div>
-    </aside>
+        <a href="#" class="menu-card" onclick="alert('준비중입니다'); return false;">
+            <div class="menu-icon">💬</div>
+            <div class="menu-title">채팅</div>
+            <div class="menu-desc">스터디 채팅방</div>
+        </a>
 
-    <!-- 오른쪽 메인 콘텐츠 -->
-    <main class="main-content">
-        <div class="content-header">(최근 등록된 댓글)</div>
+        <a href="#" class="menu-card" onclick="alert('준비중입니다'); return false;">
+            <div class="menu-icon">✍️</div>
+            <div class="menu-title">내가 작성한 글</div>
+            <div class="menu-desc">작성한 스터디 모집글</div>
+        </a>
 
-        <div class="activity-card">
-            <div class="activity-message">
-                <div class="activity-icon">
-                    <div class="activity-icon-placeholder"></div>
-                </div>
-                <div class="activity-speech-bubble">
-                    ○○님이 ○○스터디에서 코멘트를 남겼습니다 (1분 전)
-                    <br><br>
-                    회원님의 활동 시간이 이전보다 늘어났네요.
-                </div>
-            </div>
-        </div>
+        <a href="#" class="menu-card" onclick="alert('준비중입니다'); return false;">
+            <div class="menu-icon">💭</div>
+            <div class="menu-title">내가 작성한 댓글</div>
+            <div class="menu-desc">댓글 관리</div>
+        </a>
+    </div>
 
-        <div class="input-box"></div>
-    </main>
-</div>
+    <div style="text-align: center; margin-top: 40px;">
+        <a th:href="@{/logout}" class="logout-btn">로그아웃</a>
+    </div>
+</main>
 
 </body>
 </html>
