@@ -1,7 +1,7 @@
 package com.example.studygroup.service;
 
-import com.example.studygroup.domain.study.Study;
-import com.example.studygroup.repository.study.StudyRepository;
+import com.example.studygroup.domain.Study;
+import com.example.studygroup.repository.StudyRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

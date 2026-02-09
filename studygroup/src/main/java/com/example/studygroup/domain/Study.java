@@ -1,4 +1,4 @@
-package com.example.studygroup.domain.study;
+package com.example.studygroup.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -29,3 +29,4 @@ public class Study {
         this.maxParticipants = maxParticipants;
     }
 }
+

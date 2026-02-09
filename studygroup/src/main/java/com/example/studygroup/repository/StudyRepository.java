@@ -1,6 +1,6 @@
-package com.example.studygroup.repository.study;
+package com.example.studygroup.repository;
 
-import com.example.studygroup.domain.study.Study;
+import com.example.studygroup.domain.Study;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
