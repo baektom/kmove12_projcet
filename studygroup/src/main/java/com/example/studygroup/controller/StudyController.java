@@ -5,12 +5,14 @@ import com.example.studygroup.dto.request.study.StudyCreateRequest;
 import com.example.studygroup.dto.request.study.StudyUpdateRequest;
 import com.example.studygroup.service.KeywordService;
 import com.example.studygroup.service.StudyService;
+import com.example.studygroup.service.StudyMemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 // 페이지로 변경 import문
 import org.springframework.data.domain.Page;
 
@@ -20,6 +22,7 @@ public class StudyController {
 
     private final StudyService studyService;
     private final KeywordService keywordService;
+    private final StudyMemberService studyMemberService;
 
     // ✅ 메인: 조회수 TOP3 + 최신 프리뷰 + 키워드 리스트
     @GetMapping("/")
@@ -84,6 +87,8 @@ public class StudyController {
 
         model.addAttribute("study", study);
         model.addAttribute("isAuthor", loginUserId != null && loginUserId.equals(study.getAuthorId()));
+        boolean hasApplied = loginUserId != null && studyMemberService.hasApplied(id, loginUserId);
+        model.addAttribute("hasApplied", hasApplied);
         return "study/detail";
     }
 
@@ -96,7 +101,7 @@ public class StudyController {
         }
 
         StudyService.StudyDetailDto study = studyService.findStudyById(id);
-        
+
         // 작성자 권한 체크
         if (!loginUserId.equals(study.getAuthorId())) {
             return "redirect:/study/" + id + "?error=unauthorized";
@@ -182,3 +187,5 @@ public class StudyController {
         }
     }
 }
+
+

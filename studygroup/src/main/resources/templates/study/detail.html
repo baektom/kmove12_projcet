@@ -172,12 +172,12 @@
 
 <main class="container">
     <div class="detail-container">
-        
+
         <div class="detail-header">
             <h1 class="detail-title" th:text="${study.title}">스터디 제목</h1>
             <div class="detail-meta">
                 <span>조회수 <b th:text="${study.viewCount}">0</b></span>  // 조회수 표시
-                <span class="status-badge" 
+                <span class="status-badge"
                       th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
                       th:text="${study.status}">모집중</span>
                 <div class="participants-info">
@@ -208,12 +208,25 @@
             스터디 내용이 여기에 표시됩니다.
         </div>
 
+
         <div class="detail-footer">
             <div class="button-group">
                 <a th:href="@{/studies}" class="btn btn-back">목록으로</a>
             </div>
-            
+
+            <!-- 작성자가 아닌 경우: 참가 신청 버튼 -->
+            <div class="button-group" th:if="${!isAuthor and session.loginUserId != null}">
+                <form th:if="${!hasApplied}" th:action="@{/study/{id}/apply(id=${study.id})}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-primary">참가 신청</button>
+                </form>
+                <span th:if="${hasApplied}" class="status-badge status-recruiting">신청 완료</span>
+            </div>
+
+            <!-- 작성자인 경우: 관리 메뉴 -->
             <div class="button-group" th:if="${isAuthor}">
+                <!-- 참가 신청 관리 버튼 -->
+                <a th:href="@{/study/{id}/applications(id=${study.id})}" class="btn btn-primary">참가 신청 관리</a>
+
                 <!-- 모집 상태 변경 -->
                 <form th:action="@{/study/{id}/status(id=${study.id})}" method="post" class="status-control">
                     <select name="status" class="status-select" onchange="this.form.submit()">
@@ -221,12 +234,11 @@
                         <option value="CLOSED" th:selected="${study.status == '마감'}">마감</option>
                     </select>
                 </form>
-                
+
                 <!-- 수정/삭제 버튼 -->
                 <form th:action="@{/study/{id}/edit(id=${study.id})}" method="get" style="display:inline;">
                     <button type="submit" class="btn btn-edit">수정</button>
                 </form>
-
 
                 <form th:action="@{/study/{id}/delete(id=${study.id})}" method="post"
                       onsubmit="return confirm('정말 삭제하시겠습니까?');" style="display: inline;">
