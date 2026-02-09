@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< HEAD
   <component name="Encoding" native2AsciiForPropertiesFiles="true">
     <file url="file://$PROJECT_DIR$/studygroup/studygroup/src/main/java" charset="UTF-8" />
+=======
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/studygroup/src/main/java" charset="UTF-8" />
+>>>>>>> 87a0447eb7d7b1026b8f68b7b98d75e0948f9e09
   </component>
 </project>

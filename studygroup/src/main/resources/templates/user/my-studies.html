@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My 스터디 - STUDY MATE</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 40px;
+        }
+        .page-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .study-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .study-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        .study-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .study-info {
+            display: flex;
+            gap: 20px;
+            color: #666;
+            font-size: 0.95rem;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-recruiting {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-closed {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .participants-info {
+            color: #2b56f5;
+            font-weight: 600;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+            font-size: 1.1rem;
+        }
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+
+<header th:replace="~{layout/header :: header}"></header>
+
+<main class="container">
+    <h1 class="page-title">📚 내가 참가한 스터디</h1>
+    
+    <div th:if="${!#lists.isEmpty(myStudies)}">
+        <div class="study-card" th:each="study : ${myStudies}"
+             th:onclick="|location.href='@{/study/{id}(id=${study.id})}'|">
+            <div class="study-title" th:text="${study.title}">스터디 제목</div>
+            <div class="study-info">
+                <span class="status-badge"
+                      th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
+                      th:text="${study.status}">모집중</span>
+                <span class="participants-info">
+                    참여인원: <span th:text="${study.currentParticipants}">1</span> / <span th:text="${study.maxParticipants}">5</span>
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="empty-message" th:if="${#lists.isEmpty(myStudies)}">
+        아직 참가한 스터디가 없습니다.
+        <br>
+        <a th:href="@{/studies}" style="color: #2b56f5; text-decoration: underline;">스터디 찾아보기</a>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px;">
+        <a th:href="@{/mypage}" class="btn-back">마이페이지로 돌아가기</a>
+    </div>
+</main>
+
+</body>
+</html>

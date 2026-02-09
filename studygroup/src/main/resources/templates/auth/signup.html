@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>STUDY MATE - 회원가입</title>
+    <link rel="stylesheet" th:href="@{/css/signup.css}">
+    <style>
+        /* 버튼 정렬을 위한 추가 스타일 */
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        .btn-sm {
+            padding: 8px 12px;
+            background-color: #666;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            white-space: nowrap; /* 버튼 글씨 줄바꿈 방지 */
+        }
+        .btn-sm:hover { background-color: #444; }
+    </style>
+</head>
+<body>
+
+<div class="signup-container">
+    <div class="header-box">
+        <a th:href="@{/}" class="logo-text">STUDY MATE</a>
+        <h2 class="title-text">회원가입</h2>
+    </div>
+
+    <form th:action="@{/signup}" method="post" class="signup-form" onsubmit="return validateSignup()">
+
+        <div class="input-section">
+            <input type="text" name="username" id="username" placeholder="ID" required>
+            <input type="password" name="password" id="password" placeholder="비밀번호" required>
+            <input type="password" id="passwordConfirm" placeholder="비밀번호 확인" required>
+
+            <input type="text" name="name" placeholder="이름" required>
+
+            <div class="birth-group">
+                <select name="birthYear" required>
+                    <option value="">년도</option>
+                    <option th:each="y : ${#numbers.sequence(2026, 1950)}" th:value="${y}" th:text="${y}"></option>
+                </select>
+                <select name="birthMonth" required>
+                    <option value="">월</option>
+                    <option th:each="m : ${#numbers.sequence(1, 12)}" th:value="${m}" th:text="${m}"></option>
+                </select>
+                <select name="birthDay" required>
+                    <option value="">일</option>
+                    <option th:each="d : ${#numbers.sequence(1, 31)}" th:value="${d}" th:text="${d}"></option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <input type="email" id="email" name="email" placeholder="이메일" required style="flex: 1;">
+                <button type="button" onclick="sendAuthCode()" class="btn-sm">인증번호 발송</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="authInput" placeholder="인증번호 입력" required style="flex: 1;">
+                <button type="button" onclick="checkAuthCode()" class="btn-sm">확인</button>
+            </div>
+
+            <input type="text" name="phoneNumber" placeholder="휴대폰번호(010-0000-0000)" required>
+        </div>
+
+        <div class="checkbox-section">
+            <div class="checkbox-item">
+                <input type="checkbox" id="ageCheck" required>
+                <label for="ageCheck">만 15세 이상입니다 (필수)</label>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" id="termsCheck" required>
+                <label for="termsCheck">이용약관 동의 (필수)</label>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">가입하기</button>
+    </form>
+</div>
+
+<script>
+    let verified = false; // 이메일 인증 여부 상태값
+
+    // 1. 인증번호 발송 함수
+    function sendAuthCode() {
+        const email = document.getElementById('email').value;
+        if(!email) return alert("이메일을 입력하세요.");
+
+        // 서버의 MailController 주소로 요청을 보냅니다
+        fetch(`/mail/send?email=${email}`, { method: 'POST' })
+            .then(res => {
+                if(res.ok) alert("인증번호가 발송되었습니다. 메일함을 확인해주세요.");
+                else alert("메일 발송에 실패했습니다. 설정을 확인하세요.");
+            })
+            .catch(err => alert("서버 통신 오류가 발생했습니다."));
+    }
+
+    // 2. 인증번호 확인 함수
+    function checkAuthCode() {
+        const code = document.getElementById('authInput').value;
+        if(!code) return alert("인증번호를 입력하세요.");
+
+        fetch(`/mail/verify?code=${code}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if(data) {
+                    alert("인증 성공! 이제 가입이 가능합니다.");
+                    verified = true;
+                    // 인증 완료 시 입력창 수정 불가 처리 (선택사항)
+                    document.getElementById('email').readOnly = true;
+                    document.getElementById('authInput').readOnly = true;
+                } else {
+                    alert("인증번호가 틀렸습니다. 다시 확인해주세요.");
+                    verified = false;
+                }
+            });
+    }
+
+    // 3. 폼 전송 시 최종 유효성 검사 (통합 버전)
+    function validateSignup() {
+        // A. 이메일 인증 여부 확인
+        if(!verified) {
+            alert("이메일 인증을 먼저 완료해주세요.");
+            return false;
+        }
+
+        // B. 비밀번호 일치 확인
+        const pw = document.getElementById("password").value;
+        const pwConfirm = document.getElementById("passwordConfirm").value;
+        if (pw !== pwConfirm) {
+            alert("비밀번호가 일치하지 않습니다.");
+            return false;
+        }
+
+        return true; // 모든 검증 통과 시 서버로 전송
+    }
+</script>
+
+</body>
+</html>
