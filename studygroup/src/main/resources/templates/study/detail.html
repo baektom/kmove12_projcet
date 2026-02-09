@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${study.title} + ' - STUDY MATE'">스터디 상세</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .detail-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .detail-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .detail-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .detail-meta {
+            display: flex;
+            gap: 20px;
+            color: #666;
+            font-size: 0.95rem;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .status-recruiting {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-closed {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .participants-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .participants-number {
+            color: #2b56f5;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .detail-content {
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+            margin-bottom: 40px;
+            font-size: 1.05rem;
+        }
+        .detail-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            align-items: center; /* ✅ 추가 */
+        }
+        .btn {
+            display: inline-flex;        /* ✅ a/button 동일하게 박스 정렬 */
+            align-items: center;
+            justify-content: center;
+
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+
+            font-weight: 600;
+            font-size: 14px;             /* ✅ 폰트 크기 고정 */
+            line-height: 1;              /* ✅ 높이 계산 차이 제거 */
+            box-sizing: border-box;      /* ✅ padding 포함 계산 */
+
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        button.btn {
+            appearance: none;
+            -webkit-appearance: none;
+            background-clip: padding-box;
+        }
+
+        .btn-primary {
+            background-color: #2b56f5;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1a3ebf;
+        }
+        .btn-edit {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-edit:hover {
+            background-color: #218838;
+        }
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+        .status-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-select {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: white;
+        }
+        .info-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .info-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .info-value {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<header th:replace="~{layout/header :: header}"></header>
+
+<main class="container">
+    <div class="detail-container">
+        
+        <div class="detail-header">
+            <h1 class="detail-title" th:text="${study.title}">스터디 제목</h1>
+            <div class="detail-meta">
+                <span>조회수 <b th:text="${study.viewCount}">0</b></span>  // 조회수 표시
+                <span class="status-badge" 
+                      th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
+                      th:text="${study.status}">모집중</span>
+                <div class="participants-info">
+                    <span>참여인원:</span>
+                    <span class="participants-number" th:text="${study.currentParticipants}">1</span>
+                    <span>/</span>
+                    <span th:text="${study.maxParticipants}">5</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-row">
+                <span class="info-label">작성자</span>
+                <span class="info-value" th:text="${study.authorName}">홍길동</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">작성일</span>
+                <span class="info-value" th:text="${study.createdAt}">2024-01-01 12:00</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">수정일</span>
+                <span class="info-value" th:text="${study.updatedAt}">2024-01-01 12:00</span>
+            </div>
+        </div>
+
+        <div class="detail-content" th:text="${study.content}">
+            스터디 내용이 여기에 표시됩니다.
+        </div>
+
+        <div class="detail-footer">
+            <div class="button-group">
+                <a th:href="@{/studies}" class="btn btn-back">목록으로</a>
+            </div>
+            
+            <div class="button-group" th:if="${isAuthor}">
+                <!-- 모집 상태 변경 -->
+                <form th:action="@{/study/{id}/status(id=${study.id})}" method="post" class="status-control">
+                    <select name="status" class="status-select" onchange="this.form.submit()">
+                        <option value="RECRUITING" th:selected="${study.status == '모집중'}">모집중</option>
+                        <option value="CLOSED" th:selected="${study.status == '마감'}">마감</option>
+                    </select>
+                </form>
+                
+                <!-- 수정/삭제 버튼 -->
+                <form th:action="@{/study/{id}/edit(id=${study.id})}" method="get" style="display:inline;">
+                    <button type="submit" class="btn btn-edit">수정</button>
+                </form>
+
+
+                <form th:action="@{/study/{id}/delete(id=${study.id})}" method="post"
+                      onsubmit="return confirm('정말 삭제하시겠습니까?');" style="display: inline;">
+                    <input type="hidden" name="returnUrl" th:value="${returnUrl}">
+                    <button type="submit" class="btn btn-delete">삭제</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+</body>
+</html>
