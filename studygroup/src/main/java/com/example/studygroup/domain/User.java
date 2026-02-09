@@ -1,14 +1,15 @@
 package com.example.studygroup.domain;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDate;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@Setter
+@Builder // 빌더 패턴 사용
+@NoArgsConstructor // JPA를 위한 기본 생성자
+@AllArgsConstructor // ⭐ 빌더가 모든 필드를 인식하게 하려면 이게 꼭 필요합니다!
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +21,13 @@ public class User {
     private String email;
     private String phoneNumber;
     private LocalDate birthDate;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default // ⭐ 빌더 사용 시 기본값을 USER로 고정하려면 이 어노테이션을 붙여주세요.
+    private UserRole role = UserRole.USER;
 
+    public void updateRole(UserRole role) {
+        this.role = role;
+    }
     private String profileImage; // 프로필 이미지 경로
 
     @Builder
