@@ -3,6 +3,8 @@ package com.example.studygroup.dto.request.auth;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 public class SignupRequest {
@@ -16,4 +18,6 @@ public class SignupRequest {
     private int birthYear;      // 추가된 필드
     private int birthMonth;     // 추가된 필드
     private int birthDay;       // 추가된 필드
+
+    private LocalDate birthDate;
 }

@@ -6,8 +6,11 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/mail") // 공통 경로 설정
@@ -37,7 +40,13 @@ public class MailController {
         }
 
         String code = mailService.createCode();
-        mailService.sendEmail(email, code);
+        try {
+            mailService.sendEmail(email, code);
+        } catch (MailException e) {
+            // 여기 로그가 Render 로그에 찍혀서 "진짜 원인"이 보임
+            log.error("메일 발송 실패: to={}, type={}, msg={}", email, type, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("mail_send_failed");
+        }
 
         session.setAttribute("authCode", code);
         session.setAttribute("authEmail", email);
