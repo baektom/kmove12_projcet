@@ -49,13 +49,13 @@
         <tr th:each="user : ${users}">
             <td>
                 <span th:text="${user.username}"></span>
-                <span th:if="${user.username == 'moon'}" class="admin-badge">ADMIN</span>
+                <span th:if="${user.role.name() == 'ADMIN'}" class="admin-badge">ADMIN</span>
             </td>
             <td th:text="${user.name}"></td>
             <td th:text="${user.email}"></td>
             <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
             <td>
-                <form th:if="${user.username != 'moon'}"
+                <form th:if="${user.role.name() != 'ADMIN'}"
                       th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post"
                       onsubmit="return confirm('정말 이 유저를 탈퇴시키겠습니까?');">
                     <button type="submit" class="btn-delete">계정 삭제</button>

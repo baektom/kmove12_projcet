@@ -114,23 +114,41 @@
         }
     }
 
-function sendAuthCode() {
+async function sendAuthCode() {
     const email = document.getElementById('email').value;
-    if(!email) return alert("이메일을 입력하세요.");
+    if (!email) return alert("이메일을 입력하세요.");
 
-    // ⭐ type=signup 파라미터를 꼭 추가해야 합니다!
-    fetch(`/mail/send?email=${email}&type=signup`, { method: 'POST' })
-        .then(res => res.text())
-        .then(data => {
-            if(data === 'success') {
-                alert("인증번호가 발송되었습니다. 메일함을 확인해주세요.");
-            } else if(data === 'not_found') {
-                alert("이미 가입된 이메일이거나 발송할 수 없는 상태입니다.");
-            } else {
-                alert("발송 실패. 다시 시도해주세요.");
-            }
+    try {
+        const res = await fetch('/mail/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ email, type: 'signup' })
         });
+
+        // 성공 응답
+        if (res.ok) {
+            const text = await res.text();
+            if (text === 'success') {
+                alert("인증번호가 발송되었습니다. 메일함을 확인해주세요.");
+                return;
+            }
+        }
+
+        // 실패 응답 처리
+        const text = await res.text();
+
+        if (res.status === 409 || text === 'duplicate_email' || text === 'not_found') {
+            alert("이미 가입된 이메일이거나 발송할 수 없는 상태입니다.");
+            return;
+        }
+
+        alert("발송 실패. 다시 시도해주세요.");
+
+    } catch (e) {
+        alert("서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    }
 }
+
 
     function checkAuthCode() {
         const code = document.getElementById('authInput').value;
