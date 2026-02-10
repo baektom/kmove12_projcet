@@ -2,6 +2,8 @@ package com.example.studygroup.controller;
 
 import com.example.studygroup.domain.User;
 import com.example.studygroup.dto.request.auth.SignupRequest;
+import com.example.studygroup.exception.DuplicateEmailException;
+import com.example.studygroup.exception.DuplicateUsernameException;
 import com.example.studygroup.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +30,9 @@ public class AuthController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             session.setAttribute("loginUserId", user.getId());
-            // ⭐ 관리자 버튼 노출을 위해 권한(Role) 정보를 세션에 저장합니다.
             session.setAttribute("loginUserRole", user.getRole().name());
             return "redirect:/";
         }
-        // 로그인 실패 시 'error' 파라미터를 들고 로그인 페이지로 돌아갑니다.
         return "redirect:/login?error";
     }
 
@@ -42,28 +42,18 @@ public class AuthController {
         return "redirect:/";
     }
 
-    // --- 2. ID/PW 찾기 관련 (추가된 부분) ---
-    /**
-     * ID/PW 찾기 통합 페이지로 이동
-     */
+    // --- 2. ID/PW 찾기 관련 ---
     @GetMapping("/find-auth")
     public String findAuthPage() {
-        // templates/auth/find-auth.html 파일을 찾아갑니다.
         return "auth/find-auth";
     }
 
-    /**
-     * 아이디 찾기 결과 처리 (AJAX용)
-     */
     @PostMapping("/find-id")
     @ResponseBody
     public String findId(@RequestParam String name, @RequestParam String email) {
         return userService.findUsername(name, email).orElse("not_found");
     }
 
-    /**
-     * 비밀번호 재설정 처리 (AJAX용)
-     */
     @PostMapping("/reset-password")
     @ResponseBody
     public String resetPassword(@RequestParam String username, @RequestParam String newPassword) {
@@ -88,7 +78,13 @@ public class AuthController {
             return "redirect:/signup?emailMismatch";
         }
 
-        userService.register(request);
+        try {
+            userService.register(request);
+        } catch (DuplicateUsernameException e) {
+            return "redirect:/signup?duplicateUsername";
+        } catch (DuplicateEmailException e) {
+            return "redirect:/signup?duplicateEmail";
+        }
 
         // 가입 성공 시 세션에서 인증 정보 삭제 (재사용 방지)
         session.removeAttribute("emailVerified");
