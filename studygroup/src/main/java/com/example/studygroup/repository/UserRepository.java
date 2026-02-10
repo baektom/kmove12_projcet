@@ -15,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // PW 찾기용 3가지 정보 일치 확인
     Optional<User> findByUsernameAndNameAndEmail(String username, String name, String email);
+
+    boolean existsByUsername(String username);
 }

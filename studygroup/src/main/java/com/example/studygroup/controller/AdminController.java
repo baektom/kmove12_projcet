@@ -1,15 +1,16 @@
 package com.example.studygroup.controller;
 
+import com.example.studygroup.domain.User;
+import com.example.studygroup.domain.UserRole;
 import com.example.studygroup.service.UserService;
 import com.example.studygroup.service.StudyService;
-import com.example.studygroup.domain.User; // 유저 엔티티 임포트 확인
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List; // ⭐ List 임포트 추가
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -34,6 +35,7 @@ public class AdminController {
 
         model.addAttribute("totalUsers", userService.countAllUsers());
         model.addAttribute("totalStudies", studyService.countAllStudies());
+        // 최신 데이터 5건씩 가져오기 (Service에 추가 필요)
         model.addAttribute("recentUsers", userService.findRecentUsers(5));
         model.addAttribute("recentStudies", studyService.findRecentStudies(5));
 
@@ -41,19 +43,13 @@ public class AdminController {
     }
 
     /**
-     * 1. 유저 관리 페이지 (⭐ adminList 통합 버전)
+     * 1. 유저 관리 페이지
      */
     @GetMapping("/users")
     public String userManagement(HttpSession session, Model model) {
         if (!isAdmin(session)) return "redirect:/";
 
         model.addAttribute("users", userService.findAllUsers());
-
-        // ⭐ 관리자 아이디 리스트를 모델에 담아 보냅니다.
-        // 나중에 이 리스트는 DB에서 조회해오는 방식으로 발전시키면 더 좋습니다!
-        List<String> adminList = List.of("moon", "king");
-        model.addAttribute("adminList", adminList);
-
         return "admin/users";
     }
 
@@ -63,23 +59,25 @@ public class AdminController {
     @GetMapping("/studies")
     public String studyManagement(HttpSession session, Model model) {
         if (!isAdmin(session)) return "redirect:/";
+
         model.addAttribute("studies", studyService.findAllStudies());
         return "admin/studies";
     }
 
     /**
-     * 유저 삭제 처리
+     * 유저 삭제 (✅ 실제 삭제 가능/불가는 UserService가 책임)
      */
     @PostMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable Long id, HttpSession session) {
         if (!isAdmin(session)) return "redirect:/";
 
+        // UserService에서 ADMIN 삭제 방지 처리됨
         userService.deleteUser(id);
         return "redirect:/admin/users";
     }
 
     /**
-     * 스터디글 삭제 처리
+     * 스터디글 삭제 (관리자)
      */
     @PostMapping("/studies/delete/{id}")
     public String deleteStudy(@PathVariable Long id, HttpSession session) {

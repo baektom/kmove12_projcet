@@ -4,6 +4,7 @@ import com.example.studygroup.domain.User;
 import com.example.studygroup.domain.UserRole;
 import com.example.studygroup.dto.request.auth.SignupRequest;
 import com.example.studygroup.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,6 @@ public class UserService {
                 .filter(user -> passwordEncoder.matches(rawPassword, user.getPassword()));
     }
 
-    private static final List<String> ADMIN_LIST = List.of("moon", "king");
     /**
      * 회원가입 로직
      */
@@ -53,9 +53,7 @@ public class UserService {
                 .role(UserRole.USER)
                 .build();
 
-        if (ADMIN_LIST.contains(request.getUsername())) {
-            user.updateRole(UserRole.ADMIN);
-        }
+        user.updateRole(UserRole.USER);
 
         userRepository.save(user);
     }
@@ -113,14 +111,18 @@ public class UserService {
     }
 
     /**
-     * ⭐ [수정됨] 유저 삭제 기능
-     * readOnly = true를 제거하고 @Transactional을 새로 걸어주어야 실제 삭제가 반영됩니다.
+     * 유저 삭제 기능 (✅ 관리자 계정 삭제 방지 포함)
      */
     @Transactional
     public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException("해당 유저가 존재하지 않습니다. id=" + id);
+        User targetUser = userRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("해당 유저가 존재하지 않습니다. id=" + id));
+
+        // ✅ 관리자 계정 삭제 방지
+        if (targetUser.getRole() == UserRole.ADMIN) {
+            throw new IllegalStateException("관리자 계정은 삭제할 수 없습니다.");
         }
-        userRepository.deleteById(id);
+
+        userRepository.delete(targetUser);
     }
 }
