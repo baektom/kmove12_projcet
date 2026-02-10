@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>게시글 상세</title>
+    <style>
+        body{margin:0;background:#fff;font-family:Arial, Helvetica, sans-serif;}
+        .wrap{max-width:900px;margin:40px auto;padding:0 16px;}
+        h1{font-size:28px;font-weight:900;margin:0 0 16px;}
+        .card{border:1px solid #eee;border-radius:14px;padding:16px;margin-bottom:16px;}
+        .meta{font-weight:800;color:#666;font-size:14px;margin-bottom:10px;}
+        .btn{display:inline-block;padding:10px 14px;border:1px solid #ddd;border-radius:10px;font-weight:900;text-decoration:none}
+        .btn-primary{background:#2b56f5;color:#fff;border-color:#2b56f5}
+        textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;font-weight:700;min-height:80px;}
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <a class="btn" th:href="@{/study/{id}/room/board(id=${study.id})}">← 게시판으로</a>
+
+    <!-- 게시글 -->
+    <div class="card">
+        <h1 th:text="${post.title}">제목</h1>
+        <div class="meta">
+            작성자: <span th:text="${post.writerName}">writer</span>
+        </div>
+        <div th:text="${post.content}">내용</div>
+    </div>
+
+    <!-- 댓글 작성 -->
+    <div class="card">
+        <div class="meta">댓글 작성</div>
+        <form th:action="@{/study/{id}/room/board/{postId}/comment(id=${study.id}, postId=${post.id})}" method="post">
+            <textarea name="content" placeholder="댓글을 입력하세요" required></textarea>
+            <br><br>
+            <button class="btn btn-primary" type="submit">댓글 등록</button>
+        </form>
+    </div>
+
+    <!-- 댓글 목록 -->
+    <div class="card" th:if="${#lists.isEmpty(comments)}">
+        아직 댓글이 없습니다.
+    </div>
+
+    <div class="card" th:each="c : ${comments}">
+        <div class="meta">
+            <span th:text="${c.writerName}">writer</span>
+        </div>
+        <div th:text="${c.content}">내용</div>
+    </div>
+
+</div>
+</body>
+</html>
