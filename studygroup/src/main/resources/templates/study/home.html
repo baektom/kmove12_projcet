@@ -76,8 +76,8 @@
 
                         <div class="study-info">
                                 <span class="status-badge"
-                                      th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
-                                      th:text="${study.status}">모집중</span>
+                                      th:classappend="${study.status.name() == 'RECRUITING'} ? 'status-recruiting' : 'status-closed'"
+                                      th:text="${study.status.description}">모집중</span>
                             <span>
                                 참여인원
                                 <span th:text="${study.currentParticipants}" style="color:#2b56f5; font-weight:bold;">0</span> /
