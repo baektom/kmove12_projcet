@@ -11,9 +11,10 @@ body {
 
 /* 사이드바 */
 .sidebar {
-    width: 230px;
-    background: #e0e0e0;
-    padding: 20px;
+    padding: 20px; /* ✅ 패딩을 조금 더 넉넉하게 주면 훨씬 정돈되어 보입니다. */
+    position: sticky;
+    top: 82px;
+    height: fit-content;
 }
 
 .logo {

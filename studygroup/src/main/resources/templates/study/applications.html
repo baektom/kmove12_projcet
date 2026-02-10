@@ -25,7 +25,7 @@
         .btn-approve:hover { background-color: #218838; }
         .btn-reject { background-color: #dc3545; color: white; }
         .btn-reject:hover { background-color: #c82333; }
-        .btn-back { background-color: #6c757d; color: white; text-decoration: none; display: inline-block; }
+        .btn-back { background-color: #6c757d; color: white; text-decoration: none; display: inline-block; padding: 10px 25px; border-radius: 8px; font-weight: 600; }
         .btn-back:hover { background-color: #5a6268; }
         .empty-message { text-align: center; padding: 40px; color: #999; }
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; }
@@ -48,12 +48,10 @@
         </p>
     </div>
 
-    <!-- 대기중인 신청 -->
     <div class="section">
         <h2 class="section-title">⏳ 대기중인 신청 (<span th:text="${#lists.size(pendingMembers)}">0</span>건)</h2>
 
         <div class="member-list" th:if="${!#lists.isEmpty(pendingMembers)}">
-            <!-- null 방어 -->
             <div class="member-card" th:each="member : ${pendingMembers}" th:if="${member != null}">
                 <div class="member-header">
                     <div class="member-info">
@@ -73,13 +71,12 @@
                 </div>
 
                 <div class="button-group">
-                    <!-- ✅ member.id -> member.memberId 로 수정 -->
-                    <form th:action="@{/study/member/{memberId}/approve(memberId=${member.memberId})}" method="post" style="display:inline;">
+                    <form th:action="@{/study/member/{mid}/approve(mid=${member.id})}" method="post" style="display:inline;">
                         <input type="hidden" name="studyId" th:value="${study.id}">
                         <button type="submit" class="btn btn-approve">✓ 승인</button>
                     </form>
 
-                    <form th:action="@{/study/member/{memberId}/reject(memberId=${member.memberId})}" method="post" style="display:inline;">
+                    <form th:action="@{/study/member/{mid}/reject(mid=${member.id})}" method="post" style="display:inline;">
                         <input type="hidden" name="studyId" th:value="${study.id}">
                         <button type="submit" class="btn btn-reject">✗ 거부</button>
                     </form>
@@ -92,7 +89,6 @@
         </div>
     </div>
 
-    <!-- 승인된 멤버 -->
     <div class="section">
         <h2 class="section-title">✅ 승인된 멤버 (<span th:text="${#lists.size(approvedMembers)}">0</span>명)</h2>
 

@@ -140,20 +140,14 @@
         <h2 class="section-title">프로필 이미지</h2>
         <div class="profile-image-section">
             <div class="profile-preview">
-                <img th:if="${user.profileImage != null}" th:src="@{${user.profileImage}}" alt="프로필 이미지">
-                <div th:if="${user.profileImage == null}" class="profile-placeholder"></div>
+                <img th:if="${user.profileImage != null}" th:src="${user.profileImage}" alt="프로필 이미지">
+                <img th:if="${user.profileImage == null}" src="/images/default-profile.png" alt="기본 프로필" class="profile-placeholder-img">
             </div>
 
-            <form th:action="@{/mypage/upload-profile}" method="post" enctype="multipart/form-data"
-                  style="display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
-
-                <input type="file" name="profileImage" accept="image/*" required
-                       style="width: auto; font-size: 0.9rem; cursor: pointer;">
-
-                <button type="submit" class="btn btn-primary"
-                        style="padding: 10px 25px; font-size: 1rem; width: auto; white-space: nowrap;">
-                    이미지 업로드
-                </button>
+            <form th:action="@{/mypage/upload-profile}" method="post" enctype="multipart/form-data">
+                <input type="file" id="profileImageInput" name="profileImage" accept="image/*" required
+                       style="font-size: 0.9rem; cursor: pointer;">
+                <button type="submit" class="btn btn-primary">이미지 업로드</button>
             </form>
         </div>
     </div>
