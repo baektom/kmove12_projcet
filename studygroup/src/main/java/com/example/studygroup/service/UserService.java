@@ -86,15 +86,29 @@ public class UserService {
      * 유저 존재 여부 체크
      */
     public boolean checkUserExists(String type, String name, String email, String username) {
-        if ("signup".equals(type)) {
-            return !userRepository.findByEmail(email).isPresent();
-        } else if ("id".equals(type)) {
-            return userRepository.findByNameAndEmail(name, email).isPresent();
-        } else if ("pw".equals(type)) {
-            return userRepository.findByUsernameAndNameAndEmail(username, name, email).isPresent();
+
+        if ("signup".equalsIgnoreCase(type)) {
+            if (email == null) return false;
+            // 회원가입: 이메일이 이미 있으면 발송 불가
+            return !userRepository.existsByEmail(email);
         }
+
+        if ("id".equalsIgnoreCase(type)) {
+            if (name == null || email == null) return false;
+            // 아이디 찾기: name+email 존재해야 발송 가능
+            return userRepository.existsByNameAndEmail(name, email);
+        }
+
+        if ("pw".equalsIgnoreCase(type)) {
+            if (username == null || name == null || email == null) return false;
+            // 비번 찾기: username+name+email 존재해야 발송 가능
+            return userRepository.existsByUsernameAndNameAndEmail(username, name, email);
+        }
+
         return false;
     }
+
+
 
     // --- 관리자 대시보드용 메서드 ---
 
