@@ -173,50 +173,50 @@ public class StudyController {
         }
     }
 
-// 스터디 삭제
-@PostMapping("/study/{id}/delete")
-public String delete(@PathVariable Long id,
-                     @RequestParam(required = false) String returnUrl,
-                     HttpServletRequest request,
-                     HttpSession session) {
+    // 스터디 삭제
+    @PostMapping("/study/{id}/delete")
+    public String delete(@PathVariable Long id,
+                         @RequestParam(required = false) String returnUrl,
+                         HttpServletRequest request,
+                         HttpSession session) {
 
-    Long loginUserId = (Long) session.getAttribute("loginUserId");
-    if (loginUserId == null) return "redirect:/login";
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) return "redirect:/login";
 
-    try {
-        studyService.deleteStudy(id, loginUserId);
+        try {
+            studyService.deleteStudy(id, loginUserId);
 
-        // 1) 파라미터 returnUrl 우선
-        String target = returnUrl;
+            // 1) 파라미터 returnUrl 우선
+            String target = returnUrl;
 
-        // 2) 없으면 referer 헤더 fallback
-        if (target == null || target.isBlank()) {
-            target = request.getHeader("Referer");
+            // 2) 없으면 referer 헤더 fallback
+            if (target == null || target.isBlank()) {
+                target = request.getHeader("Referer");
+            }
+
+            // 3) 그래도 없으면 기본
+            if (target == null || target.isBlank()) {
+                return "redirect:/studies?deleted=true";
+            }
+
+            // 외부 redirect 방지(간단 버전)
+            if (target.startsWith("http")) {
+                return "redirect:/studies?deleted=true";
+            }
+
+            return "redirect:" + target;
+
+        } catch (IllegalStateException e) {
+            return "redirect:/study/" + id + "?error=unauthorized";
         }
-
-        // 3) 그래도 없으면 기본
-        if (target == null || target.isBlank()) {
-            return "redirect:/studies?deleted=true";
-        }
-
-        // 외부 redirect 방지(간단 버전)
-        if (target.startsWith("http")) {
-            return "redirect:/studies?deleted=true";
-        }
-
-        return "redirect:" + target;
-
-    } catch (IllegalStateException e) {
-        return "redirect:/study/" + id + "?error=unauthorized";
     }
-}
 
 
-// 모집 상태 변경
+    // 모집 상태 변경
     @PostMapping("/study/{id}/status")
-    public String changeStatus (@PathVariable Long id,
-            @RequestParam RecruitStatus status,
-            HttpSession session){
+    public String changeStatus(@PathVariable Long id,
+                               @RequestParam RecruitStatus status,
+                               HttpSession session) {
         Long loginUserId = (Long) session.getAttribute("loginUserId");
         if (loginUserId == null) {
             return "redirect:/login";
@@ -229,8 +229,9 @@ public String delete(@PathVariable Long id,
             return "redirect:/study/" + id + "?error=unauthorized";
         }
     }
+
     @GetMapping("/study/{id}/room")
-    public String studyRoom (@PathVariable Long id, Model model, HttpSession session){
+    public String studyRoom(@PathVariable Long id, Model model, HttpSession session) {
 
         // 로그인 유저
         Long loginUserId = (Long) session.getAttribute("loginUserId");
@@ -245,6 +246,101 @@ public String delete(@PathVariable Long id,
         model.addAttribute("loginUserId", loginUserId);
 
         return "study/studyRoom";
+    }
+
+    // 참가 신청 페이지
+    @GetMapping("/study/{id}/apply")
+    public String applyPage(@PathVariable Long id, Model model, HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        StudyService.StudyDetailDto study = studyService.findStudyById(id);
+        model.addAttribute("study", study);
+
+        // 재신청인지 확인
+        boolean isReapply = studyMemberService.canReapply(id, loginUserId);
+        model.addAttribute("isReapply", isReapply);
+
+        return "study/apply";
+    }
+
+    // 참가 신청 처리
+    @PostMapping("/study/{id}/apply")
+    public String applyForStudy(@PathVariable Long id,
+                                @RequestParam String applicationMessage,
+                                HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            studyMemberService.applyForStudy(id, loginUserId, applicationMessage);
+            return "redirect:/study/" + id + "?applied=true";
+        } catch (IllegalStateException e) {
+            return "redirect:/study/" + id + "?error=" + e.getMessage();
+        }
+    }
+
+    // 참가 신청 목록 조회 (작성자용)
+    @GetMapping("/study/{id}/applications")
+    public String viewApplications(@PathVariable Long id, Model model, HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            StudyService.StudyDetailDto study = studyService.findStudyById(id);
+            List<StudyMemberService.StudyMemberDto> pendingMembers = studyMemberService.getPendingMembers(id, loginUserId);
+            List<StudyMemberService.StudyMemberDto> approvedMembers = studyMemberService.getApprovedMembers(id);
+
+            model.addAttribute("study", study);
+            model.addAttribute("pendingMembers", pendingMembers);
+            model.addAttribute("approvedMembers", approvedMembers);
+
+            return "study/applications";
+        } catch (IllegalStateException e) {
+            return "redirect:/study/" + id + "?error=unauthorized";
+        }
+    }
+
+    // 참가 승인
+    @PostMapping("/study/member/{memberId}/approve")
+    public String approveMember(@PathVariable Long memberId,
+                                @RequestParam Long studyId,
+                                HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            studyMemberService.approveMember(memberId, loginUserId);
+            return "redirect:/study/" + studyId + "/applications?approved=true";
+        } catch (Exception e) {
+            return "redirect:/study/" + studyId + "/applications?error=" + e.getMessage();
+        }
+    }
+
+    // 참가 거부
+    @PostMapping("/study/member/{memberId}/reject")
+    public String rejectMember(@PathVariable Long memberId,
+                               @RequestParam Long studyId,
+                               HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            studyMemberService.rejectMember(memberId, loginUserId);
+            return "redirect:/study/" + studyId + "/applications?rejected=true";
+        } catch (Exception e) {
+            return "redirect:/study/" + studyId + "/applications?error=" + e.getMessage();
+        }
     }
 }
 
