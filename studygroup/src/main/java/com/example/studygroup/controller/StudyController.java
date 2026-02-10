@@ -186,6 +186,25 @@ public class StudyController {
             return "redirect:/study/" + id + "?error=unauthorized";
         }
     }
+    @GetMapping("/study/{id}/room")
+    public String studyRoom(@PathVariable Long id, Model model, HttpSession session) {
+
+        // 로그인 유저
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        // 스터디 정보 조회
+        StudyService.StudyDetailDto study = studyService.findStudyById(id);
+
+        model.addAttribute("study", study);
+        model.addAttribute("loginUserId", loginUserId);
+
+        return "study/studyRoom";
+    }
+
 }
+
 
 
