@@ -36,26 +36,21 @@ public class StudyMemberService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        // 작성자는 신청할 수 없음
         if (study.isAuthor(userId)) {
             throw new IllegalStateException("작성자는 참가 신청을 할 수 없습니다.");
         }
 
-        // 기존 신청 확인
         var existingMember = studyMemberRepository.findByStudyIdAndUserId(studyId, userId);
 
         if (existingMember.isPresent()) {
             StudyMember member = existingMember.get();
-            // 거부된 경우 재신청 가능
             if (member.getStatus() == MemberStatus.REJECTED) {
                 member.reapply(applicationMessage);
                 return;
             }
-            // 대기중이거나 승인된 경우
             throw new IllegalStateException("이미 참가 신청한 스터디입니다.");
         }
 
-        // 새로운 신청
         StudyMember member = StudyMember.builder()
                 .study(study)
                 .user(user)
@@ -72,16 +67,12 @@ public class StudyMemberService {
         StudyMember member = studyMemberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 멤버를 찾을 수 없습니다."));
 
-        // 작성자 권한 확인
         if (!member.getStudy().isAuthor(authorId)) {
             throw new IllegalStateException("승인 권한이 없습니다.");
         }
 
         member.approve();
-
-        // 스터디 현재 참여 인원 증가
-        Study study = member.getStudy();
-        study.incrementParticipants();
+        member.getStudy().incrementParticipants();
     }
 
     // 참가 거부
@@ -90,7 +81,6 @@ public class StudyMemberService {
         StudyMember member = studyMemberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 멤버를 찾을 수 없습니다."));
 
-        // 작성자 권한 확인
         if (!member.getStudy().isAuthor(authorId)) {
             throw new IllegalStateException("거부 권한이 없습니다.");
         }
@@ -98,7 +88,7 @@ public class StudyMemberService {
         member.reject();
     }
 
-    // 대기중인 신청 목록 조회 (작성자용)
+    // 대기중 신청 목록
     public List<StudyMemberDto> getPendingMembers(Long studyId, Long authorId) {
         Study study = studyRepository.findById(studyId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 스터디가 존재하지 않습니다."));
@@ -113,7 +103,7 @@ public class StudyMemberService {
                 .collect(Collectors.toList());
     }
 
-    // 승인된 멤버 목록 조회
+    // 승인된 멤버 목록
     public List<StudyMemberDto> getApprovedMembers(Long studyId) {
         return studyMemberRepository.findByStudyIdAndStatus(studyId, MemberStatus.APPROVED)
                 .stream()
@@ -121,7 +111,7 @@ public class StudyMemberService {
                 .collect(Collectors.toList());
     }
 
-    // 내가 참가한 스터디 목록
+    // 내가 참가한 스터디
     public List<MyStudyDto> getMyStudies(Long userId) {
         return studyMemberRepository.findByUserIdAndStatus(userId, MemberStatus.APPROVED)
                 .stream()
@@ -129,19 +119,28 @@ public class StudyMemberService {
                 .collect(Collectors.toList());
     }
 
-    // 특정 사용자가 특정 스터디에 신청한 상태 확인
+    // 신청 상태 조회
     public MemberStatus getApplicationStatus(Long studyId, Long userId) {
         return studyMemberRepository.findByStudyIdAndUserId(studyId, userId)
                 .map(StudyMember::getStatus)
                 .orElse(null);
     }
 
-    // 재신청 가능 여부 확인
+    // 재신청 가능 여부
     public boolean canReapply(Long studyId, Long userId) {
         return studyMemberRepository.findByStudyIdAndUserId(studyId, userId)
                 .map(member -> member.getStatus() == MemberStatus.REJECTED)
                 .orElse(false);
     }
+
+    // ✅🔥 추가된 메서드 (컨트롤러 에러 해결 핵심)
+    public boolean hasApplied(Long studyId, Long userId) {
+        return studyMemberRepository
+                .findByStudyIdAndUserId(studyId, userId)
+                .isPresent();
+    }
+
+    // ================= DTO =================
 
     @Getter
     public static class StudyMemberDto {
@@ -160,9 +159,8 @@ public class StudyMemberService {
             this.userEmail = member.getUser().getEmail();
             this.status = member.getStatus().getDescription();
             this.applicationMessage = member.getApplicationMessage();
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            this.appliedAt = member.getJoinedAt().format(formatter);
+            this.appliedAt = member.getJoinedAt()
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         }
     }
 

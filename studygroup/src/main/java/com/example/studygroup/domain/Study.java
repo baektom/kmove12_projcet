@@ -3,10 +3,7 @@ package com.example.studygroup.domain;
 import com.example.studygroup.domain.User;
 import com.example.studygroup.domain.keyword.StudyKeyword;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*; // ⭐ Setter, AllArgsConstructor 등을 모두 포함하기 위해 .*로 변경
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,11 +11,12 @@ import java.util.List;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Study {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -33,10 +31,12 @@ public class Study {
     private int maxParticipants;
 
     // ✅ 조회수 추가
+    @Builder.Default
     @Column(nullable = false)
     private int viewCount = 0;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     @Column(nullable = false)
     private RecruitStatus status = RecruitStatus.RECRUITING; // 기본값: 모집중
 
@@ -48,6 +48,7 @@ public class Study {
     private LocalDateTime updatedAt;
 
     // ✅ 키워드 연결(중간 엔티티)
+    @Builder.Default
     @OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudyKeyword> studyKeywords = new ArrayList<>();
 
@@ -61,6 +62,17 @@ public class Study {
         this.coverImage = coverImage;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+    /**
+     * ⭐ 스터디글 노출 여부 (기본값 true)
+     */
+    @Builder.Default
+    private boolean isVisible = true;
+
+    // --- 비즈니스 로직 ---
+
+    // 숨김 처리 메서드
+    public void hide() {
+        this.isVisible = false;
     }
 
     // 비즈니스 로직: 스터디 정보 수정
@@ -95,6 +107,11 @@ public class Study {
         }
         this.currentParticipants++;
     }
+
+    // JPA가 엔티티를 저장하기 전에 시간을 자동으로 기록합니다.
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
 }
-
-
