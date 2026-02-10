@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>채팅</title>
+    <style>
+        body{margin:0;background:#fff;font-family:Arial, Helvetica, sans-serif;}
+        .wrap{max-width:900px;margin:40px auto;padding:0 16px;}
+        h1{font-size:32px;font-weight:900;margin:0 0 8px;}
+        .sub{font-size:16px;font-weight:700;color:#333;margin:0 0 16px;}
+        .card{border:1px solid #eee;border-radius:14px;padding:16px;margin-bottom:12px;}
+        .btn{display:inline-block;padding:10px 14px;border:1px solid #ddd;border-radius:10px;font-weight:900;text-decoration:none}
+        .btn-primary{background:#2b56f5;color:#fff;border-color:#2b56f5}
+        .row{display:flex;gap:10px;justify-content:space-between;align-items:center}
+        input{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;font-weight:700}
+        .msg{margin-bottom:10px;font-weight:800}
+        .who{font-weight:900}
+        .text{font-weight:700;color:#333;margin-left:6px}
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="row">
+        <div>
+            <h1>채팅</h1>
+            <p class="sub">스터디: <span th:text="${study.title}">title</span> / ID: <span th:text="${study.id}">0</span></p>
+        </div>
+        <a class="btn" th:href="@{/study/{id}/room(id=${study.id})}">← 룸 홈으로</a>
+    </div>
+
+    <!-- ✅ 채팅 박스 -->
+    <div class="card" id="chatBox" style="height:420px; overflow:auto;">
+        <!-- ✅ 기존 DB 메시지 렌더 -->
+        <div class="msg" th:each="m : ${messages}">
+            <span class="who" th:text="${m.writerName}">USER</span> :
+            <span class="text" th:text="${m.message}">message</span>
+        </div>
+    </div>
+
+    <!-- ✅ 입력 -->
+    <div class="row" style="margin-top:10px;">
+        <input id="msgInput" placeholder="메시지를 입력하세요" style="flex:1;">
+        <button id="sendBtn" class="btn btn-primary">전송</button>
+    </div>
+
+</div>
+
+<!-- SockJS + STOMP (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+<script th:inline="javascript">
+    const studyId = /*[[${study.id}]]*/ 0;
+    const writerName = /*[[${loginUserName}]]*/ "익명";
+
+    const chatBox = document.getElementById("chatBox");
+    const msgInput = document.getElementById("msgInput");
+    const sendBtn = document.getElementById("sendBtn");
+
+    function scrollBottom() {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    scrollBottom();
+
+    // ✅ 여기! WebSocketConfig의 addEndpoint("/ws")랑 동일해야 함
+    const socket = new SockJS("/ws");
+    const stompClient = Stomp.over(socket);
+    stompClient.debug = null;
+
+    stompClient.connect({}, function () {
+        stompClient.subscribe("/topic/study." + studyId, function (frame) {
+            const data = JSON.parse(frame.body);
+
+            const div = document.createElement("div");
+            div.className = "msg";
+            div.innerHTML = `<span class="who"></span> : <span class="text"></span>`;
+            div.querySelector(".who").innerText = data.writerName;
+            div.querySelector(".text").innerText = data.message;
+
+            chatBox.appendChild(div);
+            scrollBottom();
+        });
+    });
+
+    function send() {
+        const text = msgInput.value.trim();
+        if (!text) return;
+
+        stompClient.send("/app/chat.send", {}, JSON.stringify({
+            studyId: studyId,
+            writerName: writerName,
+            message: text
+        }));
+
+        msgInput.value = "";
+    }
+
+    sendBtn.addEventListener("click", send);
+    msgInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") send();
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>게시판</title>
+    <style>
+        body{margin:0;background:#fff;font-family:Arial, Helvetica, sans-serif;}
+        .wrap{max-width:900px;margin:40px auto;padding:0 16px;}
+        h1{font-size:32px;font-weight:900;margin:0 0 8px;}
+        .sub{font-size:16px;font-weight:700;color:#333;margin:0 0 24px;}
+        .card{border:1px solid #eee;border-radius:14px;padding:16px;margin-bottom:12px;}
+        .title{font-size:18px;font-weight:900;margin:0 0 8px;}
+        .meta{font-weight:800;color:#666;font-size:14px;}
+        .btn{display:inline-block;padding:10px 14px;border:1px solid #ddd;border-radius:10px;font-weight:900;text-decoration:none}
+        .btn-primary{background:#2b56f5;color:#fff;border-color:#2b56f5}
+        input,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;font-weight:700}
+        textarea{min-height:110px;resize:vertical}
+        .row{display:flex;gap:10px;justify-content:space-between;align-items:center}
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="row">
+        <div>
+            <h1>게시판</h1>
+            <p class="sub">
+                스터디: <span th:text="${study.title}">title</span> / ID: <span th:text="${study.id}">0</span>
+            </p>
+        </div>
+        <a class="btn" th:href="@{/study/{id}/room(id=${study.id})}">← 룸 홈으로</a>
+    </div>
+
+    <!-- 글쓰기 -->
+    <div class="card">
+        <div class="title">글 작성</div>
+        <form th:action="@{/study/{id}/room/board/write(id=${study.id})}" method="post">
+            <div style="margin-bottom:10px;">
+                <input name="title" placeholder="제목" required />
+            </div>
+            <div style="margin-bottom:10px;">
+                <textarea name="content" placeholder="내용" required></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">등록</button>
+        </form>
+    </div>
+
+    <!-- 글 목록 -->
+    <div class="card" th:if="${#lists.isEmpty(posts)}">
+        아직 글이 없습니다. 첫 글을 작성해보세요!
+    </div>
+
+    <div class="card" th:each="p : ${posts}">
+        <a th:href="@{/study/{id}/room/board/{postId}(id=${study.id}, postId=${p.id})}" style="text-decoration:none;color:inherit;">
+            <div class="title" th:text="${p.title}">제목</div>
+            <div class="meta">
+                작성자: <span th:text="${p.writerName}">writer</span>
+            </div>
+        </a>
+    </div>
+
+</div>
+</body>
+</html>

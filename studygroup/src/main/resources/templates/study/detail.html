@@ -18,6 +18,25 @@
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
+
+        /* ✅ 상단 info 영역: 왼쪽 정보 + 오른쪽 상단 버튼 배치 */
+        .study-info-wrap{
+            display:flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        .study-info-left{
+            flex: 1;
+            min-width: 0;
+        }
+        .study-info-right{
+            flex: 0 0 auto;
+            display:flex;
+            gap: 10px;
+            align-items: center;
+        }
+
         .detail-title {
             font-size: 2rem;
             font-weight: bold;
@@ -68,14 +87,16 @@
             align-items: center;
             padding-top: 20px;
             border-top: 1px solid #e9ecef;
+            gap: 10px;
         }
         .button-group {
             display: flex;
             gap: 10px;
-            align-items: center; /* ✅ 추가 */
+            align-items: center;
+            flex-wrap: wrap;
         }
         .btn {
-            display: inline-flex;        /* ✅ a/button 동일하게 박스 정렬 */
+            display: inline-flex;
             align-items: center;
             justify-content: center;
 
@@ -84,9 +105,9 @@
             border-radius: 8px;
 
             font-weight: 600;
-            font-size: 14px;             /* ✅ 폰트 크기 고정 */
-            line-height: 1;              /* ✅ 높이 계산 차이 제거 */
-            box-sizing: border-box;      /* ✅ padding 포함 계산 */
+            font-size: 14px;
+            line-height: 1;
+            box-sizing: border-box;
 
             cursor: pointer;
             transition: all 0.2s;
@@ -173,32 +194,51 @@
 <main class="container">
     <div class="detail-container">
 
+        <!-- ======= 상단 영역 ======= -->
         <div class="detail-header">
-            <div class="study-info">
-                <div class="study-title" th:text="${study.title}">스터디 제목</div>
-                <div style="color: #666; font-size: 0.95rem;">
-                    <div class="info-row">
-                        <span class="info-label">작성자</span>
-                        <span class="info-value" th:text="${study.authorName}">홍길동</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">작성일</span>
-                        <span class="info-value" th:text="${study.createdAt}">2024-01-01 12:00</span>
-                    </div>
-                    <div>
-                        <span class="info-label">수정일</span>
-                        <span class="info-value" th:text="${study.updatedAt}">2024-01-01 12:00</span>
+
+            <div class="study-info-wrap">
+
+                <!-- 왼쪽: 제목 + 작성자/날짜 -->
+                <div class="study-info-left">
+                    <div class="detail-title" th:text="${study.title}">스터디 제목</div>
+
+                    <div style="color: #666; font-size: 0.95rem;">
+                        <div class="info-row">
+                            <span class="info-label">작성자</span>
+                            <span class="info-value" th:text="${study.authorName}">홍길동</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">작성일</span>
+                            <span class="info-value" th:text="${study.createdAt}">2024-01-01 12:00</span>
+                        </div>
+                        <div>
+                            <span class="info-label">수정일</span>
+                            <span class="info-value" th:text="${study.updatedAt}">2024-01-01 12:00</span>
+                        </div>
                     </div>
                 </div>
+
+                <!-- ✅ 오른쪽 위: 스터디룸 입장 버튼(작성자 OR 승인된 멤버) -->
+                <div class="study-info-right"
+                     th:if="${(isAuthor) or (applicationStatus != null and applicationStatus.name() == 'APPROVED')}">
+                    <a th:href="@{/study/{id}/room(id=${study.id})}" class="btn btn-primary">
+                        스터디룸 입장
+                    </a>
+                </div>
+
             </div>
         </div>
 
+        <!-- ======= 메타/참여정보 ======= -->
         <div class="info-section">
             <div class="detail-meta">
                 <span>조회수 <b th:text="${study.viewCount}">0</b></span>
+
                 <span class="status-badge"
                       th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
                       th:text="${study.status}">모집중</span>
+
                 <div class="participants-info">
                     <span>참여인원:</span>
                     <span class="participants-number" th:text="${study.currentParticipants}">1</span>
@@ -208,18 +248,21 @@
             </div>
         </div>
 
+        <!-- ======= 내용 ======= -->
         <div class="detail-content" th:text="${study.content}">
             스터디 내용이 여기에 표시됩니다.
         </div>
 
-
+        <!-- ======= 하단 버튼 영역 ======= -->
         <div class="detail-footer">
+
             <div class="button-group">
                 <a th:href="@{/studies}" class="btn btn-back">목록으로</a>
             </div>
 
-            <!-- 작성자가 아닌 경우: 참가 신청 버튼 -->
+            <!-- 작성자가 아닌 경우: 참가 신청/상태 -->
             <div class="button-group" th:if="${!isAuthor and session.loginUserId != null}">
+
                 <!-- 신청 안 한 경우 -->
                 <a th:if="${applicationStatus == null}"
                    th:href="@{/study/{id}/apply(id=${study.id})}"
@@ -237,21 +280,19 @@
                     ✅ 참가 승인됨
                 </span>
 
-                <!-- 거부됨 - 재신청 가능 -->
+                <!-- 거부됨 - 재신청 -->
                 <div th:if="${applicationStatus != null and applicationStatus.name() == 'REJECTED'}"
-                     style="display: flex; align-items: center; gap: 10px;">
+                     style="display:flex; align-items:center; gap:10px;">
                     <span class="status-badge status-closed">❌ 거부됨</span>
-                    <a th:href="@{/study/{id}/apply(id=${study.id})}"
-                       class="btn btn-primary">재신청하기</a>
+                    <a th:href="@{/study/{id}/apply(id=${study.id})}" class="btn btn-primary">재신청하기</a>
                 </div>
             </div>
 
             <!-- 작성자인 경우: 관리 메뉴 -->
             <div class="button-group" th:if="${isAuthor}">
-                <!-- 참가 신청 관리 버튼 -->
+
                 <a th:href="@{/study/{id}/applications(id=${study.id})}" class="btn btn-primary">참가 신청 관리</a>
 
-                <!-- 모집 상태 변경 -->
                 <form th:action="@{/study/{id}/status(id=${study.id})}" method="post" class="status-control">
                     <select name="status" class="status-select" onchange="this.form.submit()">
                         <option value="RECRUITING" th:selected="${study.status == '모집중'}">모집중</option>
@@ -259,16 +300,16 @@
                     </select>
                 </form>
 
-                <!-- 수정/삭제 버튼 -->
                 <form th:action="@{/study/{id}/edit(id=${study.id})}" method="get" style="display:inline;">
                     <button type="submit" class="btn btn-edit">수정</button>
                 </form>
 
                 <form th:action="@{/study/{id}/delete(id=${study.id})}" method="post"
-                      onsubmit="return confirm('정말 삭제하시겠습니까?');" style="display: inline;">
+                      onsubmit="return confirm('정말 삭제하시겠습니까?');" style="display:inline;">
                     <input type="hidden" name="returnUrl" th:value="${returnUrl}">
                     <button type="submit" class="btn btn-delete">삭제</button>
                 </form>
+
             </div>
         </div>
 

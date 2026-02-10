@@ -231,3 +231,13 @@
 
 </body>
 </html>
+<form th:action="@{/study/member/{memberId}/approve(memberId=${member.id})}" method="post" style="display: inline;">
+    <input type="hidden" name="studyId" th:value="${study.id}">
+    <button type="submit" class="btn btn-approve">승인</button>
+</form>
+
+<form th:action="@{/study/member/{memberId}/reject(memberId=${member.id})}" method="post" style="display: inline;">
+    <input type="hidden" name="studyId" th:value="${study.id}">
+    <button type="submit" class="btn btn-reject">거부</button>
+</form>
+

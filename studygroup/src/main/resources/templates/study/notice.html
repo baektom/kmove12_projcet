@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>공지</title>
+    <style>
+        body{margin:0;background:#fff;font-family:Arial,Helvetica,sans-serif;color:#111}
+        .wrap{max-width:920px;margin:40px auto;padding:0 16px}
+        .card{border:1px solid #eee;border-radius:16px;padding:22px}
+        .title{font-size:26px;font-weight:900;margin:0 0 12px}
+        .sub{font-weight:800;color:#444;margin-bottom:14px}
+        .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+        .btn{display:inline-flex;align-items:center;padding:10px 14px;border-radius:12px;border:1px solid #e2e2ea;background:#fff;font-weight:900;cursor:pointer;text-decoration:none;color:#111}
+        .btn-blue{border-color:#2b56f5;background:#2b56f5;color:#fff}
+        .item{border:1px solid #f0f0f5;border-radius:14px;padding:14px 16px;margin-top:10px}
+        .item-title{font-weight:900;font-size:18px}
+        .meta{margin-top:6px;font-weight:800;color:#666;font-size:13px}
+        .content{margin-top:10px;white-space:pre-line;font-weight:700;color:#333}
+        form{display:block}
+
+        /* write form */
+        .write{border:1px solid #f0f0f5;border-radius:14px;padding:14px 16px;margin-top:14px;background:#fafbff}
+        .input, .textarea{
+            width:100%;
+            box-sizing:border-box;
+            border:1px solid #e2e2ea;
+            border-radius:12px;
+            padding:12px 12px;
+            font-weight:800;
+            font-size:14px;
+            outline:none;
+        }
+        .textarea{min-height:120px;resize:vertical}
+        .row{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap}
+    </style>
+</head>
+
+<body>
+<div class="wrap">
+    <div class="card">
+        <div class="top">
+            <div>
+                <div class="title">공지</div>
+                <div class="sub">스터디: <span th:text="${study.title}">스터디</span></div>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <a class="btn" th:href="@{/study/{id}/room(id=${study.id})}">← 룸 홈</a>
+            </div>
+        </div>
+
+        <!-- ✅ 공지 작성 폼 (일단 룸 들어올 수 있는 사람은 작성 가능) -->
+        <div class="write">
+            <form th:action="@{/study/{id}/room/notice/write(id=${study.id})}" method="post">
+                <div style="font-weight:900; margin-bottom:10px;">공지 작성</div>
+                <input class="input" name="title" placeholder="제목" required>
+                <div style="height:10px;"></div>
+                <textarea class="textarea" name="content" placeholder="내용" required></textarea>
+
+                <div class="row">
+                    <div style="font-weight:800; color:#666; font-size:13px;">
+                        * 작성자 본인만 삭제 가능합니다.
+                    </div>
+                    <button class="btn btn-blue" type="submit">등록</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ✅ 공지 없음 -->
+        <div th:if="${#lists.isEmpty(notices)}" style="margin-top:14px; font-weight:800; color:#666;">
+            아직 공지가 없습니다.
+        </div>
+
+        <!-- ✅ 공지 목록 -->
+        <div th:each="n : ${notices}" class="item">
+            <div class="item-title" th:text="${n.title}">공지 제목</div>
+            <div class="meta">
+                <span th:text="${n.writerName}">작성자</span>
+                · <span th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span>
+            </div>
+            <div class="content" th:text="${n.content}">내용</div>
+
+            <!-- ✅ 작성자만 삭제 -->
+            <div style="margin-top:10px;" th:if="${n.writerId} == ${loginUserId}">
+                <form th:action="@{/study/{id}/room/notice/{noticeId}/delete(id=${study.id}, noticeId=${n.id})}"
+                      method="post">
+                    <button class="btn" type="submit" onclick="return confirm('삭제할까요?')">삭제</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

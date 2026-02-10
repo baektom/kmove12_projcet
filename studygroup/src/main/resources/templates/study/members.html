@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>멤버</title>
+    <style>
+        body { margin:0; background:#fff; font-family: Arial, Helvetica, sans-serif; color:#111; }
+        .wrap { max-width: 920px; margin: 40px auto; padding: 0 16px; }
+        .card { border:1px solid #eee; border-radius:16px; padding: 22px; }
+        .title { font-size: 26px; font-weight: 800; margin: 0 0 14px 0; }
+        .sub { color:#444; font-weight:700; margin-bottom: 18px; }
+        .btn { display:inline-flex; align-items:center; padding:10px 14px; border-radius:12px; border:1px solid #e2e2ea; background:#fff; font-weight:800; cursor:pointer; }
+
+        .row { border:1px solid #f0f0f5; border-radius:14px; padding: 14px 16px; margin-top: 10px; display:flex; justify-content:space-between; align-items:center; }
+        .name { font-weight: 900; }
+        .badge { font-weight: 900; color:#2b56f5; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1 class="title">멤버</h1>
+        <div class="sub">
+            스터디: <span th:text="${study.title}">스터디 제목</span>
+        </div>
+
+        <!-- 지금은 더미 멤버(다음 단계에서 승인 멤버 목록 DB 연동) -->
+        <div class="row">
+            <div class="name">관리자</div>
+            <div class="badge">AUTHOR</div>
+        </div>
+        <div class="row">
+            <div class="name">도쿄여행자</div>
+            <div class="badge">MEMBER</div>
+        </div>
+
+        <div style="margin-top:18px;">
+            <a class="btn" th:href="@{/study/{id}/room(id=${study.id})}">← 룸 홈으로</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

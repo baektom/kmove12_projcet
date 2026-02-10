@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${post.title} + ' | 게시글'">게시글</title>
+    <style>
+        body{margin:0;background:#fff;font-family:Arial, Helvetica, sans-serif;color:#111;}
+        .wrap{max-width:900px;margin:40px auto;padding:0 16px;}
+        .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;}
+        .top .study{font-weight:900;font-size:15px;color:#222;}
+        .card{border:1px solid #eee;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 1px 10px rgba(0,0,0,0.03);}
+        .title{font-size:24px;font-weight:900;margin:0 0 10px;letter-spacing:-0.2px;}
+        .meta{display:flex;gap:10px;flex-wrap:wrap;font-weight:800;color:#666;font-size:13px;margin-bottom:14px;}
+        .pill{background:#f5f6fb;border:1px solid #eceefe;border-radius:999px;padding:6px 10px;}
+        .content{white-space:pre-wrap;font-weight:700;line-height:1.75;font-size:15px;color:#222;}
+        .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid #ddd;border-radius:12px;font-weight:900;text-decoration:none;background:#fff;color:#111;cursor:pointer}
+        .btn-primary{background:#2b56f5;color:#fff;border-color:#2b56f5}
+        .btn:hover{filter:brightness(0.98);}
+        textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;font-weight:700;font-size:14px;resize:vertical;min-height:95px;outline:none;}
+        textarea:focus{border-color:#2b56f5;box-shadow:0 0 0 3px rgba(43,86,245,0.12);}
+        .section-title{font-size:18px;font-weight:900;margin:0 0 10px;}
+        .comment{border-top:1px solid #f1f1f1;padding-top:14px;margin-top:14px;}
+        .comment .head{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+        .comment .who{font-weight:900;}
+        .comment .time{font-weight:800;color:#888;font-size:12px;}
+        .comment .text{white-space:pre-wrap;font-weight:700;color:#333;margin-top:8px;line-height:1.65;}
+        .empty{font-weight:800;color:#666;}
+    </style>
+</head>
+
+<body>
+<div class="wrap">
+
+    <div class="top">
+        <div class="study">
+            스터디: <span th:text="${study.title}">title</span> / ID: <span th:text="${study.id}">0</span>
+        </div>
+        <a class="btn" th:href="@{/study/{id}/room/board(id=${study.id})}">← 목록으로</a>
+    </div>
+
+    <!-- 게시글 -->
+    <div class="card">
+        <div class="title" th:text="${post.title}">제목</div>
+
+        <div class="meta">
+            <span class="pill">작성자: <span th:text="${post.writerName}">writer</span></span>
+            <span class="pill" th:if="${post.createdAt != null}">
+        작성일: <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">time</span>
+      </span>
+        </div>
+
+        <div class="content" th:text="${post.content}">내용</div>
+    </div>
+
+    <!-- 댓글 작성 -->
+    <div class="card">
+        <div class="section-title">댓글 작성</div>
+
+        <form th:action="@{/study/{id}/room/board/{postId}/comment(id=${study.id}, postId=${post.id})}" method="post">
+            <textarea name="content" placeholder="댓글 내용을 입력하세요" required></textarea>
+
+            <div style="margin-top:10px; display:flex; justify-content:flex-end;">
+                <button class="btn btn-primary" type="submit">댓글 등록</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 댓글 목록 -->
+    <div class="card" th:if="${comments == null or #lists.isEmpty(comments)}">
+        <div class="empty">아직 댓글이 없습니다.</div>
+    </div>
+
+    <div class="card" th:each="c : ${comments}">
+        <div class="comment">
+            <div class="head">
+                <div class="who" th:text="${c.writerName}">writer</div>
+                <div class="time" th:if="${c.createdAt != null}"
+                     th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">time</div>
+            </div>
+            <div class="text" th:text="${c.content}">comment</div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
