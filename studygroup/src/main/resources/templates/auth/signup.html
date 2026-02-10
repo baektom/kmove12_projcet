@@ -5,7 +5,7 @@
     <title>STUDY MATE - 회원가입</title>
     <link rel="stylesheet" th:href="@{/css/signup.css}">
     <style>
-        .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
         .btn-sm {
             padding: 8px 12px;
             background-color: #666;
@@ -17,14 +17,17 @@
             white-space: nowrap;
         }
         .btn-sm:hover { background-color: #444; }
+
         /* 실시간 메시지 스타일 */
-        #passwordMessage {
+        .msg {
             font-size: 0.85rem;
             margin-top: -8px;
             margin-bottom: 10px;
             display: block;
             font-weight: 500;
         }
+        #passwordMessage { }
+        #usernameMessage { }
     </style>
 </head>
 <body>
@@ -35,15 +38,26 @@
         <h2 class="title-text">회원가입</h2>
     </div>
 
+    <!-- 서버 리다이렉트 파라미터로 오는 메시지 처리 -->
+    <div style="display:none;">
+        <span id="server-dup-username" th:if="${param.duplicateUsername}">1</span>
+        <span id="server-dup-email" th:if="${param.duplicateEmail}">1</span>
+        <span id="server-email-not-verified" th:if="${param.emailNotVerified}">1</span>
+        <span id="server-email-mismatch" th:if="${param.emailMismatch}">1</span>
+    </div>
+
     <form th:action="@{/signup}" method="post" class="signup-form" onsubmit="return validateSignup()">
 
         <div class="input-section">
+
+            <!-- ✅ ID + 중복확인 버튼 -->
             <input type="text" name="username" id="username" placeholder="ID" required>
+            <div id="usernameMessage" class="msg"></div>
+
 
             <input type="password" name="password" id="password" placeholder="비밀번호" required oninput="checkPasswordMatch()">
             <input type="password" id="passwordConfirm" placeholder="비밀번호 확인" required oninput="checkPasswordMatch()">
-
-            <div id="passwordMessage"></div>
+            <div id="passwordMessage" class="msg"></div>
 
             <input type="text" name="name" placeholder="이름" required>
 
@@ -91,15 +105,24 @@
 </div>
 
 <script>
-    let verified = false;
+    // ----------------------------
+    // 서버에서 넘어온 파라미터 안내
+    // ----------------------------
+    window.addEventListener("DOMContentLoaded", () => {
+        if (document.getElementById("server-dup-username")) alert("이미 사용 중인 아이디입니다.");
+        if (document.getElementById("server-dup-email")) alert("이미 사용 중인 이메일입니다.");
+        if (document.getElementById("server-email-not-verified")) alert("이메일 인증을 먼저 완료해주세요.");
+        if (document.getElementById("server-email-mismatch")) alert("인증한 이메일과 입력한 이메일이 일치하지 않습니다.");
+    });
 
-    // 실시간 비밀번호 일치 검사 함수
+    // ----------------------------
+    // 비밀번호 일치 검사
+    // ----------------------------
     function checkPasswordMatch() {
         const password = document.getElementById("password").value;
         const confirm = document.getElementById("passwordConfirm").value;
         const message = document.getElementById("passwordMessage");
 
-        // 확인 칸이 비어있을 때는 메시지를 보여주지 않음
         if (confirm === "") {
             message.innerText = "";
             return;
@@ -114,45 +137,108 @@
         }
     }
 
-async function sendAuthCode() {
-    const email = document.getElementById('email').value;
-    if (!email) return alert("이메일을 입력하세요.");
+    // ----------------------------
+    // ✅ 아이디 중복 체크 (버튼 + 디바운스 자동 체크)
+    // ----------------------------
+    const usernameInput = document.getElementById("username");
+    const usernameMsg = document.getElementById("usernameMessage");
 
-    try {
-        const res = await fetch('/mail/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ email, type: 'signup' })
-        });
+    let lastCheckedUsername = null;
+    let usernameAvailable = false;
+    let debounceTimer = null;
 
-        // 성공 응답
-        if (res.ok) {
-            const text = await res.text();
-            if (text === 'success') {
-                alert("인증번호가 발송되었습니다. 메일함을 확인해주세요.");
-                return;
-            }
-        }
+    function setUsernameMsg(text, ok) {
+        usernameMsg.innerText = text;
+        usernameMsg.style.color = ok ? "green" : "red";
+    }
 
-        // 실패 응답 처리
-        const text = await res.text();
+    async function checkUsernameNow() {
+        const username = usernameInput.value.trim();
 
-        if (res.status === 409 || text === 'duplicate_email' || text === 'not_found') {
-            alert("이미 가입된 이메일이거나 발송할 수 없는 상태입니다.");
+        // (옵션) 아이디 규칙 검사 하고 싶으면 여기서 걸러도 됨
+        // 예: 4~20자 영문/숫자/_ 만 허용
+        // if (!/^[a-zA-Z0-9_]{4,20}$/.test(username)) {
+        //   usernameAvailable = false;
+        //   lastCheckedUsername = null;
+        //   setUsernameMsg("아이디는 4~20자, 영문/숫자/_ 만 가능합니다.", false);
+        //   return;
+        // }
+
+        if (!username) {
+            usernameAvailable = false;
+            lastCheckedUsername = null;
+            usernameMsg.innerText = "";
             return;
         }
 
-        alert("발송 실패. 다시 시도해주세요.");
+        try {
+            const res = await fetch(`/api/users/check-username?username=${encodeURIComponent(username)}`);
+            const data = await res.json();
 
-    } catch (e) {
-        alert("서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.");
+            usernameAvailable = !!data.available;
+            lastCheckedUsername = username;
+
+            setUsernameMsg(data.message, usernameAvailable);
+        } catch (e) {
+            usernameAvailable = false;
+            lastCheckedUsername = null;
+            setUsernameMsg("아이디 중복 확인 중 오류가 발생했습니다.", false);
+        }
     }
-}
 
+    // 입력 시 디바운스(400ms)
+    usernameInput.addEventListener("input", () => {
+        usernameAvailable = false;
+        lastCheckedUsername = null;
+        usernameMsg.innerText = "";
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            checkUsernameNow();
+        }, 400);
+    });
+
+    // ----------------------------
+    // 이메일 인증 로직 (기존 유지)
+    // ----------------------------
+    let verified = false;
+
+    async function sendAuthCode() {
+        const email = document.getElementById('email').value;
+        if (!email) return alert("이메일을 입력하세요.");
+
+        try {
+            const res = await fetch('/mail/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ email, type: 'signup' })
+            });
+
+            if (res.ok) {
+                const text = await res.text();
+                if (text === 'success') {
+                    alert("인증번호가 발송되었습니다. 메일함을 확인해주세요.");
+                    return;
+                }
+            }
+
+            const text = await res.text();
+            if (res.status === 409 || text === 'duplicate_email' || text === 'not_found') {
+                alert("이미 가입된 이메일이거나 발송할 수 없는 상태입니다.");
+                return;
+            }
+
+            alert("발송 실패. 다시 시도해주세요.");
+
+        } catch (e) {
+            alert("서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.");
+        }
+    }
 
     function checkAuthCode() {
         const code = document.getElementById('authInput').value;
         if(!code) return alert("인증번호를 입력하세요.");
+
         fetch(`/mail/verify?code=${code}`, { method: 'POST' })
             .then(res => res.json())
             .then(data => {
@@ -168,6 +254,9 @@ async function sendAuthCode() {
             });
     }
 
+    // ----------------------------
+    // ✅ 가입 직전 최종 검증
+    // ----------------------------
     function validateSignup() {
         if(!verified) {
             alert("이메일 인증을 먼저 완료해주세요.");
@@ -178,6 +267,13 @@ async function sendAuthCode() {
         const pwConfirm = document.getElementById("passwordConfirm").value;
         if (pw !== pwConfirm) {
             alert("비밀번호가 일치하지 않습니다. 다시 확인해주세요.");
+            return false;
+        }
+
+        // ✅ 중복체크 완료 + 현재 입력값과 마지막 체크 값 일치 여부 확인
+        const currentUsername = usernameInput.value.trim();
+        if (!usernameAvailable || lastCheckedUsername !== currentUsername) {
+            alert("아이디 중복 확인을 먼저 완료해주세요.");
             return false;
         }
 
