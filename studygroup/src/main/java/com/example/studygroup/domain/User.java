@@ -3,6 +3,7 @@ package com.example.studygroup.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -21,12 +22,17 @@ public class User {
     private String email;
     private String phoneNumber;
     private LocalDate birthDate;
+    private LocalDateTime createdAt;
     @Enumerated(EnumType.STRING)
     @Builder.Default // ⭐ 빌더 사용 시 기본값을 USER로 고정하려면 이 어노테이션을 붙여주세요.
     private UserRole role = UserRole.USER;
 
     public void updateRole(UserRole role) {
         this.role = role;
+    }
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
     }
     private String profileImage; // 프로필 이미지 경로
 

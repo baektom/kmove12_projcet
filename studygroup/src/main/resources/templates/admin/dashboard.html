@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 대시보드 - STUDY MATE</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .admin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; }
+        .stat-card { background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 5px solid #ff4d4d; }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .data-table th, .data-table td { border: 1px solid #ddd; padding: 12px 8px; text-align: left; font-size: 0.9rem; }
+
+        /* ⭐ 테이블 헤더 배경색 추가 부분 */
+        .data-table th {
+            background-color: #f1f3f5; /* 연한 회색 배경 */
+            color: #495057;           /* 진한 회색 글자 */
+            font-weight: 700;
+        }
+
+        .nav-links { margin-bottom: 20px; }
+        .nav-links a { margin-right: 15px; font-weight: bold; color: #333; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div th:replace="~{layout/header :: header}"></div>
+
+<div style="max-width: 1000px; margin: 30px auto; padding: 0 20px;">
+    <h2>관리자 대시보드</h2>
+
+    <div class="nav-links">
+        <a href="/admin/users">👤 유저 관리</a>
+        <a href="/admin/studies">📚 스터디 관리</a>
+        <a href="/admin/reports">🚨 신고 관리</a>
+    </div>
+
+    <div class="admin-grid">
+        <div class="stat-card">
+            <h4>총 가입 유저</h4>
+            <h2 th:text="${totalUsers} + '명'">0명</h2>
+        </div>
+        <div class="stat-card">
+            <h4>활성 스터디글</h4>
+            <h2 th:text="${totalStudies} + '개'">0개</h2>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <h3>최근 가입 유저</h3>
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>이름</th>
+                <th>이메일</th>
+                <th>가입일</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${recentUsers}">
+                <td th:text="${user.username}"></td>
+                <td th:text="${user.name}"></td>
+                <td th:text="${user.email}"></td>
+                <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

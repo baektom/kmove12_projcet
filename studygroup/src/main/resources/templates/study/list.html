@@ -12,7 +12,7 @@
   <h2 style="margin:20px 0;">전체 스터디룸</h2>
 
   <form th:action="@{/studies}" method="get" style="display:flex; gap:10px; margin:20px 0;">
-    <input type="text" name="q" th:value="${q}" placeholder="제목으로 검색"
+    <input type="text" name="q" th:value="${q}" placeholder="제목/키워드로 검색"
            style="flex:1; padding:12px 16px; border:2px solid #e9ecef; border-radius:10px;">
     <button type="submit"
             style="padding:12px 24px; border:none; border-radius:10px; background:#2b56f5; color:#fff; font-weight:700;">
@@ -58,14 +58,15 @@
          class="study-title">스터디 제목</a>
 
       <div class="study-info">
-            <span class="status-badge"
-                  th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
-                  th:text="${study.status}">모집중</span>
+  <span class="status-badge"
+        th:classappend="${study.status.name() == 'RECRUITING'} ? 'status-recruiting' : 'status-closed'"
+        th:text="${study.status.description}">모집중</span>
+
         <span>
-              참여인원
-              <span th:text="${study.currentParticipants}" style="color:#2b56f5; font-weight:bold;">0</span> /
-              <span th:text="${study.maxParticipants}">5</span>
-            </span>
+    참여인원
+    <span th:text="${study.currentParticipants}" style="color:#2b56f5; font-weight:bold;">0</span> /
+    <span th:text="${study.maxParticipants}">5</span>
+  </span>
         <span style="color:#666;">조회수 <b th:text="${study.viewCount}">0</b></span>
       </div>
     </div>
