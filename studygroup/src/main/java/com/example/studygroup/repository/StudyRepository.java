@@ -46,4 +46,7 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
      * ✅ 제목 포함 검색 (필요 시 유지)
      */
     List<Study> findByTitleContaining(String keyword);
+
+    // ✅ 작성자가 만든 스터디 조회
+    List<Study> findByAuthorId(Long authorId);
 }

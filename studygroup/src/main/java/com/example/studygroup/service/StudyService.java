@@ -65,7 +65,7 @@ public class StudyService {
     }
 
     @Transactional
-    public Long createStudy(StudyCreateRequest request, Long userId) {
+    public Long createStudy(StudyCreateRequest request, Long userId, String coverImagePath) {
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
@@ -75,7 +75,8 @@ public class StudyService {
                 .currentParticipants(1)
                 .maxParticipants(request.getMaxParticipants())
                 .author(author)
-                .isVisible(true) // 기본 노출 설정
+                .coverImage(coverImagePath)
+                .isVisible(true)
                 .build();
 
         Study savedStudy = studyRepository.save(study);
@@ -91,14 +92,14 @@ public class StudyService {
     }
 
     @Transactional
-    public void updateStudy(Long studyId, StudyUpdateRequest request, Long userId) {
+    public void updateStudy(Long studyId, StudyUpdateRequest request, Long userId, String coverImagePath) {
         Study study = studyRepository.findById(studyId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 스터디가 존재하지 않습니다."));
 
         if (!study.isAuthor(userId)) {
             throw new IllegalStateException("수정 권한이 없습니다.");
         }
-        study.update(request.getTitle(), request.getContent(), request.getMaxParticipants());
+        study.update(request.getTitle(), request.getContent(), request.getMaxParticipants(), coverImagePath);
     }
 
     @Transactional
@@ -191,6 +192,7 @@ public class StudyService {
         private final String updatedAt;
         private final int viewCount;
         private List<String> keywordNames;
+        private final String coverImage;
 
         public StudyDetailDto(Study study, List<String> keywordNames) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -205,6 +207,7 @@ public class StudyService {
             this.createdAt = study.getCreatedAt().format(formatter);
             this.updatedAt = study.getUpdatedAt().format(formatter);
             this.viewCount = study.getViewCount();
+            this.coverImage = study.getCoverImage();
             this.keywordNames = keywordNames;
         }
     }

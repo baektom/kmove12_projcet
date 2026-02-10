@@ -54,7 +54,7 @@
       <td style="font-weight: 500;" th:text="${study.title}"></td>
       <td th:text="${study.authorName}"></td>
       <td>
-    <span th:classappend="${study.status.name() == 'RECRUITING' ? 'recruiting' : 'closed'}"
+    <span th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
           class="status-badge"
           th:text="${study.status.description}"></span>
       </td>

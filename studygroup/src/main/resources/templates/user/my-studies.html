@@ -6,45 +6,120 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 40px auto;
             padding: 40px;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
         }
         .page-title {
             font-size: 2rem;
             font-weight: bold;
-            margin-bottom: 30px;
             color: #333;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            background-color: #f8f9fa;
+            padding: 5px;
+            border-radius: 30px;
+        }
+        .filter-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 25px;
+            background-color: transparent;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .filter-btn:hover {
+            background-color: #e9ecef;
+        }
+        .filter-btn.active {
+            background-color: #2b56f5;
+            color: white;
+        }
+        .study-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
         .study-card {
             background-color: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: all 0.2s;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s;
             cursor: pointer;
+            position: relative;
         }
         .study-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            transform: translateY(-5px);
+        }
+        .study-cover {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .study-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .study-cover-placeholder {
+            font-size: 3rem;
+        }
+        .creator-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .study-body {
+            padding: 20px;
         }
         .study-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .crown-icon {
+            color: #ffd700;
+            font-size: 1.1rem;
         }
         .study-info {
             display: flex;
-            gap: 20px;
-            color: #666;
-            font-size: 0.95rem;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
         }
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
+            padding: 5px 14px;
+            border-radius: 15px;
             font-size: 0.85rem;
             font-weight: 600;
         }
@@ -57,14 +132,22 @@
             color: #721c24;
         }
         .participants-info {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        .participants-number {
             color: #2b56f5;
-            font-weight: 600;
+            font-weight: bold;
         }
         .empty-message {
             text-align: center;
-            padding: 60px;
+            padding: 80px 20px;
             color: #999;
             font-size: 1.1rem;
+        }
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
         }
         .btn-back {
             background-color: #6c757d;
@@ -87,30 +170,75 @@
 <header th:replace="~{layout/header :: header}"></header>
 
 <main class="container">
-    <h1 class="page-title">📚 내가 참가한 스터디</h1>
-    
-    <div th:if="${!#lists.isEmpty(myStudies)}">
+    <div class="page-header">
+        <h1 class="page-title">📚 My 스터디</h1>
+
+        <div class="filter-buttons">
+            <a th:href="@{/mypage/my-studies(filter='all')}"
+               class="filter-btn"
+               th:classappend="${currentFilter == 'all' ? 'active' : ''}">
+                전체보기
+            </a>
+            <a th:href="@{/mypage/my-studies(filter='created')}"
+               class="filter-btn"
+               th:classappend="${currentFilter == 'created' ? 'active' : ''}">
+                내가 만든 스터디
+            </a>
+            <a th:href="@{/mypage/my-studies(filter='joined')}"
+               class="filter-btn"
+               th:classappend="${currentFilter == 'joined' ? 'active' : ''}">
+                참가한 스터디
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(myStudies)}" class="study-grid">
         <div class="study-card" th:each="study : ${myStudies}"
              th:onclick="|location.href='@{/study/{id}(id=${study.id})}'|">
-            <div class="study-title" th:text="${study.title}">스터디 제목</div>
-            <div class="study-info">
-                <span class="status-badge"
-                      th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
-                      th:text="${study.status}">모집중</span>
-                <span class="participants-info">
-                    참여인원: <span th:text="${study.currentParticipants}">1</span> / <span th:text="${study.maxParticipants}">5</span>
-                </span>
+
+            <div class="study-cover">
+                <img th:if="${study.coverImage != null}"
+                    th:src="@{${study.coverImage}}"
+                     alt="스터디 대문">
+                <div th:if="${study.coverImage == null}" class="study-cover-placeholder">📖</div>
+
+                <div th:if="${study.creator}" class="creator-badge">👑</div>
+            </div>
+
+            <div class="study-body">
+                <div class="study-title">
+                    <span th:text="${study.title}">스터디 제목</span>
+                </div>
+
+                <div class="study-info">
+                    <span class="status-badge"
+                          th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
+                          th:text="${study.status}">모집중</span>
+                    <span class="participants-info">
+                        <span class="participants-number" th:text="${study.currentParticipants}">1</span>
+                        / <span th:text="${study.maxParticipants}">5</span>명
+                    </span>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="empty-message" th:if="${#lists.isEmpty(myStudies)}">
-        아직 참가한 스터디가 없습니다.
+
+    <div th:if="${#lists.isEmpty(myStudies)}" class="empty-message">
+        <div class="empty-icon">📭</div>
+        <div th:if="${currentFilter == 'all'}">
+            아직 참가한 스터디가 없습니다.
+        </div>
+        <div th:if="${currentFilter == 'created'}">
+            아직 만든 스터디가 없습니다.
+        </div>
+        <div th:if="${currentFilter == 'joined'}">
+            아직 참가한 스터디가 없습니다.
+        </div>
         <br>
         <a th:href="@{/studies}" style="color: #2b56f5; text-decoration: underline;">스터디 찾아보기</a>
     </div>
-    
-    <div style="text-align: center; margin-top: 30px;">
+
+    <div style="text-align: center; margin-top: 40px;">
         <a th:href="@{/mypage}" class="btn-back">마이페이지로 돌아가기</a>
     </div>
 </main>
