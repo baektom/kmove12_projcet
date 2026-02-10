@@ -1,7 +1,7 @@
 package com.example.studygroup.repository.study;
 
-import com.example.studygroup.domain.study.MemberStatus;
-import com.example.studygroup.domain.study.StudyMember;
+import com.example.studygroup.domain.MemberStatus;
+import com.example.studygroup.domain.StudyMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

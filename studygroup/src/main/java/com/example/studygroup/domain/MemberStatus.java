@@ -1,4 +1,4 @@
-package com.example.studygroup.domain.study;
+package com.example.studygroup.domain;
 
 public enum MemberStatus {
     PENDING("대기중"),

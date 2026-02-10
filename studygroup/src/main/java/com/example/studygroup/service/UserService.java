@@ -8,12 +8,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true) // 기본은 읽기 전용으로 설정
 public class UserService {
 
     private final UserRepository userRepository;
@@ -28,7 +32,7 @@ public class UserService {
     }
 
     /**
-     * 회원가입 로직 (아이디 "moon"은 관리자로 등록)
+     * 회원가입 로직
      */
     @Transactional
     public void register(SignupRequest request) {
@@ -45,19 +49,18 @@ public class UserService {
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
                 .birthDate(birthDate)
-                .role(UserRole.USER) // 기본 권한
+                .role(UserRole.USER)
                 .build();
 
-        // ⭐ 관리자 계정 자동 부여 로직
         if ("moon".equals(request.getUsername())) {
-            user.setRole(UserRole.ADMIN);
+            user.updateRole(UserRole.ADMIN);
         }
 
         userRepository.save(user);
     }
 
     /**
-     * ⭐ [추가됨] 이름과 이메일로 아이디 찾기
+     * 이름과 이메일로 아이디 찾기
      */
     public Optional<String> findUsername(String name, String email) {
         return userRepository.findByNameAndEmail(name, email)
@@ -65,13 +68,12 @@ public class UserService {
     }
 
     /**
-     * 비밀번호 업데이트 (이전 비밀번호와 동일 여부 체크 포함)
+     * 비밀번호 업데이트
      */
     @Transactional
     public String updatePassword(String username, String newPassword) {
         return userRepository.findByUsername(username)
                 .map(user -> {
-                    // 이전 비밀번호와 같은지 확인
                     if (passwordEncoder.matches(newPassword, user.getPassword())) {
                         return "same_password";
                     }
@@ -82,28 +84,42 @@ public class UserService {
     }
 
     /**
-     * 가입 정보 존재 여부 및 이메일 중복 체크
+     * 유저 존재 여부 체크
      */
     public boolean checkUserExists(String type, String name, String email, String username) {
         if ("signup".equals(type)) {
-            // 회원가입 시: 이미 존재하는 이메일인지 체크 (중복 가입 방지)
             return !userRepository.findByEmail(email).isPresent();
         } else if ("id".equals(type)) {
-            // ID 찾기 시: 이름과 이메일이 일치하는 계정이 있는지 체크
             return userRepository.findByNameAndEmail(name, email).isPresent();
         } else if ("pw".equals(type)) {
-            // PW 찾기 시: 아이디, 이름, 이메일이 모두 일치하는지 체크
             return userRepository.findByUsernameAndNameAndEmail(username, name, email).isPresent();
         }
         return false;
     }
 
+    // --- 관리자 대시보드용 메서드 ---
+
+    public long countAllUsers() {
+        return userRepository.count();
+    }
+
+    public List<User> findAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public List<User> findRecentUsers(int limit) {
+        return userRepository.findAll(PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "id"))).getContent();
+    }
+
     /**
-     * 관리자 권한 부여 (운영용)
+     * ⭐ [수정됨] 유저 삭제 기능
+     * readOnly = true를 제거하고 @Transactional을 새로 걸어주어야 실제 삭제가 반영됩니다.
      */
     @Transactional
-    public void grantAdminRole(String username) {
-        userRepository.findByUsername(username)
-                .ifPresent(user -> user.updateRole(UserRole.ADMIN));
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new IllegalArgumentException("해당 유저가 존재하지 않습니다. id=" + id);
+        }
+        userRepository.deleteById(id);
     }
 }

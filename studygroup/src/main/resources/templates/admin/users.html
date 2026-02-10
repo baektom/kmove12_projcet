@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>유저 관리 - STUDY MATE</title>
+    <style>
+        /* 대시보드 스타일 복제 */
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8f9fa; margin: 0; padding: 0; }
+        .header { background: white; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .logo { color: #3b5bdb; font-weight: bold; font-size: 20px; text-decoration: none; }
+        .container { padding: 50px; max-width: 1000px; margin: 0 auto; }
+        h2 { font-size: 24px; color: #333; margin-bottom: 30px; display: flex; align-items: center; }
+
+        /* 테이블 스타일 */
+        .user-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.03); }
+        .user-table th { background: #fafafa; padding: 15px; text-align: left; border-bottom: 1px solid #eee; color: #666; font-size: 14px; }
+        .user-table td { padding: 15px; border-bottom: 1px solid #eee; color: #333; vertical-align: middle; }
+
+        /* 삭제 버튼 */
+        .btn-delete { background: #ff4d4d; color: white; border: none; border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .btn-delete:hover { background: #e60000; }
+        .admin-badge { background: #edf2ff; color: #3b5bdb; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <a href="/" class="logo">STUDY MATE</a>
+    <div>
+        <button onclick="location.href='/admin/dashboard'" style="background:#ff5c5c; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">관리자 페이지</button>
+        <button onclick="location.href='/mypage'" style="background:#dee2e6; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; margin-left:10px;">my page</button>
+    </div>
+</header>
+
+<div class="container">
+    <h2>👤 유저 관리</h2>
+
+    <table class="user-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>이름</th>
+            <th>이메일</th>
+            <th>가입일</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${users}">
+            <td>
+                <span th:text="${user.username}"></span>
+                <span th:if="${user.username == 'moon'}" class="admin-badge">ADMIN</span>
+            </td>
+            <td th:text="${user.name}"></td>
+            <td th:text="${user.email}"></td>
+            <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+            <td>
+                <form th:if="${user.username != 'moon'}"
+                      th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post"
+                      onsubmit="return confirm('정말 이 유저를 탈퇴시키겠습니까?');">
+                    <button type="submit" class="btn-delete">강제 탈퇴</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

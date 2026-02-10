@@ -1,6 +1,6 @@
 package com.example.studygroup.domain.keyword;
 
-import com.example.studygroup.domain.study.Study;
+import com.example.studygroup.domain.Study;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

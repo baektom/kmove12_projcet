@@ -1,13 +1,13 @@
 package com.example.studygroup.service;
 
 import com.example.studygroup.domain.User;
-import com.example.studygroup.domain.study.MemberRole;
-import com.example.studygroup.domain.study.MemberStatus;
-import com.example.studygroup.domain.study.Study;
-import com.example.studygroup.domain.study.StudyMember;
+import com.example.studygroup.domain.MemberRole;
+import com.example.studygroup.domain.MemberStatus;
+import com.example.studygroup.domain.Study;
+import com.example.studygroup.domain.StudyMember;
 import com.example.studygroup.repository.UserRepository;
 import com.example.studygroup.repository.study.StudyMemberRepository;
-import com.example.studygroup.repository.study.StudyRepository;
+import com.example.studygroup.repository.StudyRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
