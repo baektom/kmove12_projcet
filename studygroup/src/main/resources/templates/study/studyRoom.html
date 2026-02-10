@@ -1,69 +1,318 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title th:text="${study.title} + ' | 스터디룸'">스터디룸</title>
-    <link rel="stylesheet" href="/css/studyRoom.css">
+
+    <style>
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f6f7fb; color:#111; }
+        a { text-decoration: none; color: inherit; }
+
+        /* Buttons */
+        .btn {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid #e2e2ea;
+            background:#fff;
+            cursor:pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background:#2b56f5;
+            color:#fff;
+            border-color:#2b56f5;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1100px;
+            margin: 18px auto;
+            padding: 0 14px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 16px;
+        }
+
+        .card {
+            background:#fff;
+            border:1px solid #e9e9ee;
+            border-radius: 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        }
+
+        .card-header {
+            padding: 18px 18px 12px 18px;
+            border-bottom: 1px solid #f0f0f5;
+            display:flex;
+            align-items:flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .title {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+            line-height: 1.2;
+        }
+
+        .meta {
+            margin-top: 8px;
+            display:flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pill {
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: #f4f5f9;
+            border: 1px solid #ececf3;
+            font-size: 13px;
+            font-weight: 600;
+            color:#333;
+        }
+
+        .card-body {
+            padding: 18px;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 16px;
+        }
+
+        /* Cover */
+        .cover {
+            width: 100%;
+            height: 220px;
+            border-radius: 16px;
+            background: #f1f2f6;
+            border: 1px solid #ececf3;
+            overflow: hidden;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#666;
+            font-weight: 700;
+            position: relative;
+        }
+        .cover img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
+        }
+        .cover-badge{
+            position:absolute;
+            left:12px;
+            bottom:12px;
+            background: rgba(0,0,0,0.55);
+            color:#fff;
+            padding:6px 10px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:800;
+        }
+
+        /* Content section */
+        .section { display:flex; flex-direction: column; gap: 12px; }
+        .section h3 { margin: 0; font-size: 16px; font-weight: 800; }
+        .desc { margin: 0; color:#444; line-height: 1.6; white-space: pre-line; }
+
+        /* Upload block */
+        .upload-row {
+            display:flex;
+            gap:10px;
+            align-items:center;
+            flex-wrap: wrap;
+        }
+
+        /* Gallery */
+        .gallery {
+            display:grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap:12px;
+        }
+        .photo-card {
+            border:1px solid #eee;
+            border-radius:12px;
+            padding:10px;
+            background:#fff;
+            position: relative;
+        }
+        .photo-card img {
+            width:100%;
+            height:140px;
+            object-fit:cover;
+            border-radius:10px;
+            display:block;
+        }
+        .photo-meta {
+            margin-top:8px;
+            font-size:12px;
+            color:#666;
+        }
+        .tag-cover{
+            position:absolute;
+            top:12px;
+            left:12px;
+            background:#2b56f5;
+            color:#fff;
+            font-size:12px;
+            font-weight:800;
+            padding:6px 10px;
+            border-radius:999px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            padding: 14px;
+            position: sticky;
+            top: 82px;
+            height: fit-content;
+        }
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 800;
+            margin: 4px 4px 10px 4px;
+            color:#333;
+        }
+        .menu { display:flex; flex-direction: column; gap: 10px; }
+        .menu a { width: 100%; }
+        .menu .btn {
+            width: 100%;
+            justify-content: space-between;
+            padding: 12px 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .card-body { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
+        }
+    </style>
 </head>
 
 <body>
-<div class="container">
 
-    <!-- 왼쪽 사이드바 -->
-    <aside class="sidebar">
-        <div class="logo">StudyMate</div>
+<header th:replace="~{layout/header :: header}"></header>
 
-        <p class="study-title" th:text="${study.title}">
-            일본어 공부 같이 하실 분 구합니다!
-        </p>
+<main class="container">
 
-        <p class="study-id">
-            스터디 ID: <span th:text="${study.id}"></span>
-        </p>
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <h1 class="title" th:text="${study.title}">스터디 제목</h1>
+
+                <div class="meta">
+                    <span class="pill">
+                        👥 참여인원
+                        <span th:text="${study.currentParticipants}">0</span>/<span th:text="${study.maxParticipants}">0</span>
+                    </span>
+
+                    <span class="pill">
+                        📌 모집상태
+                        <span th:text="${study.status}">모집중</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- ✅ 대표 이미지(coverPhoto) 표시 -->
+            <div class="cover">
+                <img th:if="${coverPhoto != null}" th:src="${coverPhoto.url}" alt="cover">
+                <div th:if="${coverPhoto == null}">Study Cover</div>
+                <div class="cover-badge" th:if="${coverPhoto != null}">대표 이미지</div>
+            </div>
+
+            <div class="section">
+                <h3>사진 추가</h3>
+                <form th:action="@{/study/{id}/room/photos(id=${study.id})}"
+                      method="post"
+                      enctype="multipart/form-data"
+                      class="upload-row">
+                    <input type="file" name="file" accept="image/*" required>
+                    <button type="submit" class="btn btn-primary">업로드</button>
+                </form>
+
+                <h3 style="margin-top: 8px;">사진 갤러리</h3>
+
+                <div class="gallery">
+                    <div class="photo-card" th:each="p : ${photos}">
+
+                        <!-- ✅ 대표 배지 -->
+                        <div class="tag-cover" th:if="${p.cover}">대표</div>
+
+                        <img th:src="${p.url}" alt="photo">
+                        <div class="photo-meta" th:text="${p.uploaderName}">작성자</div>
+
+                        <!-- ✅ 대표로 설정 (업로더만 보이게 / 이미 대표면 숨김) -->
+                        <form th:if="${p.uploaderId} == ${loginUserId} and !${p.cover}"
+                              th:action="@{/study/{id}/room/photos/{photoId}/cover(id=${study.id}, photoId=${p.id})}"
+                              method="post">
+                            <button type="submit" class="btn" style="width:100%; margin-top:8px;">대표로 설정</button>
+                        </form>
+
+                        <!-- ✅ 삭제 버튼 (업로더만) -->
+                        <form th:if="${p.uploaderId} == ${loginUserId}"
+                              th:action="@{/study/{id}/room/photos/{photoId}/delete(id=${study.id}, photoId=${p.id})}"
+                              method="post">
+                            <button type="submit" class="btn" style="width:100%; margin-top:8px;">삭제</button>
+                        </form>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 12px;">스터디 소개 / 내용</h3>
+                <p class="desc" th:text="${study.content}">
+                    스터디 내용이 여기에 표시됩니다.
+                </p>
+
+                <h3>다음 단계</h3>
+                <p class="desc">
+                    - 오른쪽 메뉴(게시판/공지/채팅/멤버) 버튼을 눌러서 페이지 이동이 되는지 먼저 확인하세요.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <aside class="card sidebar">
+        <div class="sidebar-title">룸 기능</div>
+
+        <div class="menu">
+            <a th:href="@{/study/{id}/room/board(id=${study.id})}">
+                <div class="btn btn-ghost">게시판 <span>→</span></div>
+            </a>
+
+            <a th:href="@{/study/{id}/room/notice(id=${study.id})}">
+                <div class="btn btn-ghost">공지 <span>→</span></div>
+            </a>
+
+            <a th:href="@{/study/{id}/room/chat(id=${study.id})}">
+                <div class="btn btn-ghost">채팅 <span>→</span></div>
+            </a>
+
+            <a th:href="@{/study/{id}/room/members(id=${study.id})}">
+                <div class="btn btn-ghost">멤버 <span>→</span></div>
+            </a>
+
+            <a th:href="@{/study/{id}/room(id=${study.id})}">
+                <div class="btn btn-primary">룸 홈 <span>✓</span></div>
+            </a>
+        </div>
     </aside>
 
-    <!-- 오른쪽 메인 -->
-    <main class="main">
+</main>
 
-        <!-- 상단 버튼 -->
-        <div class="top-buttons">
-            <a th:href="@{/study/{id}/chat(id=${study.id})}">
-                <button>채팅방</button>
-            </a>
-            <a th:href="@{/study/{id}/post/write(id=${study.id})}">
-                <button>게시물 작성</button>
-            </a>
-            <a href="/mypage">
-                <button>My Page</button>
-            </a>
-        </div>
-
-        <!-- 공지 -->
-        <div class="notice">
-            📢 공지는 추후 DB 연동 예정입니다.
-        </div>
-
-        <!-- 게시글 -->
-        <div class="post">
-            <span>혹시 지하철은 일본어로 뭐라고 하나요?</span>
-            <span class="writer">도쿄여행자</span>
-        </div>
-
-        <div class="post">
-            <span>이거 한자가 왜 이렇게 되는지 아시는 분?</span>
-            <span class="writer">USER1020</span>
-        </div>
-
-        <!-- 갤러리 -->
-        <h3>그룹 갤러리</h3>
-        <div class="gallery">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
-
-    </main>
-</div>
 </body>
 </html>

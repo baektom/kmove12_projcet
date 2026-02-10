@@ -1,5 +1,6 @@
 package com.example.studygroup.controller;
 
+import com.example.studygroup.domain.MemberStatus;
 import com.example.studygroup.domain.RecruitStatus;
 import com.example.studygroup.dto.request.study.StudyCreateRequest;
 import com.example.studygroup.dto.request.study.StudyUpdateRequest;
@@ -21,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 // 페이지로 변경 import문
 import org.springframework.data.domain.Page;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Controller
 @RequiredArgsConstructor
@@ -51,7 +54,7 @@ public class StudyController {
         model.addAttribute("studyPage", studyPage);
         model.addAttribute("studyList", studyPage.getContent());
 
-        model.addAttribute("keywordList", keywordService.findAll()); // 전체보기에서는 전체 키워드가 더 자연스러움
+        model.addAttribute("keywordList", keywordService.findAll());
         model.addAttribute("selectedKeywordId", keywordId);
         model.addAttribute("q", q);
         model.addAttribute("page", page);
@@ -90,19 +93,30 @@ public class StudyController {
         return "redirect:/study/" + studyId;
     }
 
-    // 스터디 상세 페이지(조회수 +1은 service에서 처리)
+    // ✅ 스터디 상세 페이지
     @GetMapping("/study/{id}")
     public String detail(@PathVariable Long id, Model model, HttpSession session, HttpServletRequest request) {
         StudyService.StudyDetailDto study = studyService.findStudyById(id);
         Long loginUserId = (Long) session.getAttribute("loginUserId");
 
-        String referer = request.getHeader("Referer"); // 이전 페이지
+        String referer = request.getHeader("Referer");
         model.addAttribute("returnUrl", referer);
 
         model.addAttribute("study", study);
-        model.addAttribute("isAuthor", loginUserId != null && loginUserId.equals(study.getAuthorId()));
-        boolean hasApplied = loginUserId != null && studyMemberService.hasApplied(id, loginUserId);
+        model.addAttribute("loginUserId", loginUserId);
+
+        boolean isAuthor = (loginUserId != null && loginUserId.equals(study.getAuthorId()));
+        model.addAttribute("isAuthor", isAuthor);
+
+        MemberStatus applicationStatus = null;
+        if (loginUserId != null) {
+            applicationStatus = studyMemberService.getApplicationStatus(id, loginUserId);
+        }
+        model.addAttribute("applicationStatus", applicationStatus);
+
+        boolean hasApplied = (loginUserId != null && studyMemberService.hasApplied(id, loginUserId));
         model.addAttribute("hasApplied", hasApplied);
+
         return "study/detail";
     }
 
@@ -212,6 +226,7 @@ public class StudyController {
     }
 
 
+
     // 모집 상태 변경
     @PostMapping("/study/{id}/status")
     public String changeStatus(@PathVariable Long id,
@@ -229,15 +244,11 @@ public class StudyController {
             return "redirect:/study/" + id + "?error=unauthorized";
         }
     }
-
     @GetMapping("/study/{id}/room")
     public String studyRoom(@PathVariable Long id, Model model, HttpSession session) {
 
-        // 로그인 유저
-        Long loginUserId = (Long) session.getAttribute("loginUserId");
-        if (loginUserId == null) {
-            return "redirect:/login";
-        }
+    // ✅ 중요: /study/{id}/room 은 RoomController가 담당하도록 StudyController에서는 제거함
+}
 
         // 스터디 정보 조회
         StudyService.StudyDetailDto study = studyService.findStudyById(id);
