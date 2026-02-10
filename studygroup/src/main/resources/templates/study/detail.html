@@ -30,6 +30,12 @@
             color: #666;
             font-size: 0.95rem;
         }
+        .study-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+           }
         .status-badge {
             display: inline-block;
             padding: 6px 16px;
@@ -195,11 +201,12 @@
 
         <div class="info-section">
             <div class="detail-meta">
-                <span>조회수 <b th:text="${study.viewCount}">0</b></span>
-                <span class="status-badge"
-                      th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
-                      th:text="${study.status}">모집중</span>
                 <div class="participants-info">
+                    <span>조회수 <b th:text="${study.viewCount}">0</b></span>
+                    <span class="status-badge"
+                          th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
+                          th:text="${study.status}">모집중</span>
+
                     <span>참여인원:</span>
                     <span class="participants-number" th:text="${study.currentParticipants}">1</span>
                     <span>/</span>

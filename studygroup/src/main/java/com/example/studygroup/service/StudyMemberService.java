@@ -1,6 +1,7 @@
 package com.example.studygroup.service;
 
 import com.example.studygroup.domain.User;
+import java.util.ArrayList;
 import com.example.studygroup.domain.MemberRole;
 import com.example.studygroup.domain.MemberStatus;
 import com.example.studygroup.domain.Study;
@@ -172,6 +173,8 @@ public class StudyMemberService {
         private final int currentParticipants;
         private final int maxParticipants;
         private final String status;
+        private final String coverImage;
+        private final boolean isCreator; // 내가 만든 스터디인지 여부
 
         public MyStudyDto(Study study) {
             this.id = study.getId();
@@ -179,6 +182,53 @@ public class StudyMemberService {
             this.currentParticipants = study.getCurrentParticipants();
             this.maxParticipants = study.getMaxParticipants();
             this.status = study.getStatus().getDescription();
+            this.coverImage = study.getCoverImage();
+            this.isCreator = false;
+        }
+
+        public MyStudyDto(Study study, boolean isCreator) {
+            this.id = study.getId();
+            this.title = study.getTitle();
+            this.currentParticipants = study.getCurrentParticipants();
+            this.maxParticipants = study.getMaxParticipants();
+            this.status = study.getStatus().getDescription();
+            this.coverImage = study.getCoverImage();
+            this.isCreator = isCreator;
         }
     }
+
+
+    // 내가 만든 스터디 목록
+    public List<MyStudyDto> getMyCreatedStudies(Long userId) {
+        return studyRepository.findByAuthorId(userId)
+                .stream()
+                .map(MyStudyDto::new)
+                .collect(Collectors.toList());
+    }
+
+    // 내가 참가한 스터디 + 내가 만든 스터디 통합
+    public List<MyStudyDto> getAllMyStudies(Long userId) {
+        List<MyStudyDto> result = new ArrayList<>();
+
+        // 내가 만든 스터디 (isCreator = true)
+        List<Study> createdStudies = studyRepository.findByAuthorId(userId);
+        for (Study study : createdStudies) {
+            result.add(new MyStudyDto(study, true));
+        }
+
+        // 내가 참가한 스터디 (isCreator = false)
+        List<StudyMember> joinedMembers = studyMemberRepository.findByUserIdAndStatus(userId, MemberStatus.APPROVED);
+        for (StudyMember member : joinedMembers) {
+            // 내가 만든 스터디는 중복 방지
+            if (!member.getStudy().isAuthor(userId)) {
+                result.add(new MyStudyDto(member.getStudy(), false));
+            }
+        }
+
+        // 최신순 정렬
+        result.sort((a, b) -> b.getId().compareTo(a.getId()));
+
+        return result;
+    }
 }
+

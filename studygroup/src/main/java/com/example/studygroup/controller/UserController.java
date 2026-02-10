@@ -123,14 +123,28 @@ public class UserController {
 
     // My 스터디 페이지
     @GetMapping("/mypage/my-studies")
-    public String myStudies(HttpSession session, Model model) {
+    public String myStudies(@RequestParam(defaultValue = "all") String filter,
+                            HttpSession session, Model model) {
         Long loginUserId = (Long) session.getAttribute("loginUserId");
         if (loginUserId == null) {
             return "redirect:/login";
         }
 
-        List<StudyMemberService.MyStudyDto> myStudies = studyMemberService.getMyStudies(loginUserId);
+        List<StudyMemberService.MyStudyDto> myStudies;
+
+        switch (filter) {
+            case "created":
+                myStudies = studyMemberService.getMyCreatedStudies(loginUserId);
+                break;
+            case "joined":
+                myStudies = studyMemberService.getMyStudies(loginUserId);
+                break;
+            default:
+                myStudies = studyMemberService.getAllMyStudies(loginUserId);
+        }
+
         model.addAttribute("myStudies", myStudies);
+        model.addAttribute("currentFilter", filter);
 
         return "user/my-studies";
     }

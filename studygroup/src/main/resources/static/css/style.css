@@ -124,6 +124,7 @@
         .study-info {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 15px;
             color: #666;
             font-size: 0.9rem;

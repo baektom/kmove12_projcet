@@ -27,6 +27,8 @@ public class Study {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    private String coverImage; // 스터디 대문 사진
+
     private int currentParticipants;
     private int maxParticipants;
 
@@ -56,6 +58,7 @@ public class Study {
         this.currentParticipants = currentParticipants;
         this.maxParticipants = maxParticipants;
         this.author = author;
+        this.coverImage = coverImage;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -64,6 +67,7 @@ public class Study {
     public void update(String title, String content, int maxParticipants) {
         this.title = title;
         this.content = content;
+        if (coverImage != null) this.coverImage = coverImage;
         this.maxParticipants = maxParticipants;
         this.updatedAt = LocalDateTime.now();
     }

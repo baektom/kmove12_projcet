@@ -38,4 +38,7 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
 
     // ✅ 메인 프리뷰(최신 5개)
     List<Study> findTop5ByOrderByCreatedAtDesc();
+
+    // 작성자별 스터디 목록
+    List<Study> findByAuthorId(Long authorId);
 }
