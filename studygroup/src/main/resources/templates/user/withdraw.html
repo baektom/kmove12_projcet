@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원 탈퇴 - STUDY MATE</title>
+    <style>
+        body { display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Pretendard', sans-serif; background-color: #fff; }
+        .withdraw-container { text-align: center; max-width: 600px; }
+        .logo-placeholder { background: #eee; padding: 10px 20px; display: inline-block; margin-bottom: 40px; color: #555; }
+        .sad-face {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 30px; /* ✅ 좌우 마진을 auto로 설정하여 가운데로 보냅니다. */
+    display: flex;       /* 내부의 SVG 아이콘도 중앙에 오도록 돕습니다. */
+    align-items: center;
+    justify-content: center;
+}
+        .main-text { font-size: 2.5rem; font-weight: bold; margin-bottom: 15px; }
+        .sub-text { color: #999; font-size: 1.1rem; line-height: 1.6; margin-bottom: 50px; }
+        .btn-withdraw { background-color: #bbb; color: white; padding: 15px 50px; border: none; border-radius: 30px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-withdraw:hover { background-color: #ff4d4d; }
+    </style>
+</head>
+<body>
+<div class="withdraw-container">
+    <div class="main-visual" style="text-align: center; padding: 40px 0;">
+        <img th:src="@{/img/globe_icon.png}" alt="logo" style="width: 300px;">
+    </div>
+    <div class="sad-face">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+    </div>
+    <h1 class="main-text">영원히 함께할거라 믿었는데...</h1>
+    <p class="sub-text">탈퇴 후 모든 데이터는 삭제되며 복구할 수 없습니다.<br>정말 탈퇴하실건가요?</p>
+    <form th:action="@{/mypage/withdraw}" method="post">
+        <button type="submit" class="btn-withdraw">지금 탈퇴하기</button>
+    </form>
+</div>
+</body>
+</html>

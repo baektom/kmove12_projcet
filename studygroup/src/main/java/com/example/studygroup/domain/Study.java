@@ -1,6 +1,6 @@
 package com.example.studygroup.domain;
 
-import com.example.studygroup.domain.User;
+
 import com.example.studygroup.domain.keyword.StudyKeyword;
 import jakarta.persistence.*;
 import lombok.*; // ⭐ Setter, AllArgsConstructor 등을 모두 포함하기 위해 .*로 변경
