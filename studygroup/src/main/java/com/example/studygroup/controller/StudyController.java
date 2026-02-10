@@ -2,7 +2,6 @@ package com.example.studygroup.controller;
 
 import com.example.studygroup.domain.RecruitStatus;
 import com.example.studygroup.dto.request.study.StudyCreateRequest;
-import com.example.studygroup.domain.MemberStatus;
 import com.example.studygroup.dto.request.study.StudyUpdateRequest;
 import com.example.studygroup.service.KeywordService;
 import com.example.studygroup.service.StudyService;
@@ -88,12 +87,8 @@ public class StudyController {
 
         model.addAttribute("study", study);
         model.addAttribute("isAuthor", loginUserId != null && loginUserId.equals(study.getAuthorId()));
-
-        // 참가 신청 상태 확인
-        MemberStatus applicationStatus = loginUserId != null ? studyMemberService.getApplicationStatus(id, loginUserId) : null;
-        model.addAttribute("applicationStatus", applicationStatus);
-        boolean canReapply = loginUserId != null && studyMemberService.canReapply(id, loginUserId);
-        model.addAttribute("canReapply", canReapply);
+        boolean hasApplied = loginUserId != null && studyMemberService.hasApplied(id, loginUserId);
+        model.addAttribute("hasApplied", hasApplied);
         return "study/detail";
     }
 
@@ -119,8 +114,8 @@ public class StudyController {
     // 스터디 수정 처리
     @PostMapping("/study/{id}/edit")
     public String update(@PathVariable Long id,
-                         @ModelAttribute StudyUpdateRequest request,
-                         HttpSession session) {
+                        @ModelAttribute StudyUpdateRequest request,
+                        HttpSession session) {
         Long loginUserId = (Long) session.getAttribute("loginUserId");
         if (loginUserId == null) {
             return "redirect:/login";
@@ -177,8 +172,8 @@ public class StudyController {
     // 모집 상태 변경
     @PostMapping("/study/{id}/status")
     public String changeStatus(@PathVariable Long id,
-                               @RequestParam RecruitStatus status,
-                               HttpSession session) {
+                              @RequestParam RecruitStatus status,
+                              HttpSession session) {
         Long loginUserId = (Long) session.getAttribute("loginUserId");
         if (loginUserId == null) {
             return "redirect:/login";
@@ -191,101 +186,25 @@ public class StudyController {
             return "redirect:/study/" + id + "?error=unauthorized";
         }
     }
+    @GetMapping("/study/{id}/room")
+    public String studyRoom(@PathVariable Long id, Model model, HttpSession session) {
 
-    // 참가 신청 페이지
-    @GetMapping("/study/{id}/apply")
-    public String applyPage(@PathVariable Long id, Model model, HttpSession session) {
+        // 로그인 유저
         Long loginUserId = (Long) session.getAttribute("loginUserId");
         if (loginUserId == null) {
             return "redirect:/login";
         }
 
+        // 스터디 정보 조회
         StudyService.StudyDetailDto study = studyService.findStudyById(id);
+
         model.addAttribute("study", study);
+        model.addAttribute("loginUserId", loginUserId);
 
-        // 재신청인지 확인
-        boolean isReapply = studyMemberService.canReapply(id, loginUserId);
-        model.addAttribute("isReapply", isReapply);
-
-        return "study/apply";
+        return "study/studyRoom";
     }
 
-    // 참가 신청 처리
-    @PostMapping("/study/{id}/apply")
-    public String applyForStudy(@PathVariable Long id,
-                                @RequestParam String applicationMessage,
-                                HttpSession session) {
-        Long loginUserId = (Long) session.getAttribute("loginUserId");
-        if (loginUserId == null) {
-            return "redirect:/login";
-        }
-
-        try {
-            studyMemberService.applyForStudy(id, loginUserId, applicationMessage);
-            return "redirect:/study/" + id + "?applied=true";
-        } catch (IllegalStateException e) {
-            return "redirect:/study/" + id + "?error=" + e.getMessage();
-        }
-    }
-
-    // 참가 신청 목록 조회 (작성자용)
-    @GetMapping("/study/{id}/applications")
-    public String viewApplications(@PathVariable Long id, Model model, HttpSession session) {
-        Long loginUserId = (Long) session.getAttribute("loginUserId");
-        if (loginUserId == null) {
-            return "redirect:/login";
-        }
-
-        try {
-            StudyService.StudyDetailDto study = studyService.findStudyById(id);
-            List<StudyMemberService.StudyMemberDto> pendingMembers = studyMemberService.getPendingMembers(id, loginUserId);
-            List<StudyMemberService.StudyMemberDto> approvedMembers = studyMemberService.getApprovedMembers(id);
-
-            model.addAttribute("study", study);
-            model.addAttribute("pendingMembers", pendingMembers);
-            model.addAttribute("approvedMembers", approvedMembers);
-
-            return "study/applications";
-        } catch (IllegalStateException e) {
-            return "redirect:/study/" + id + "?error=unauthorized";
-        }
-    }
-
-    // 참가 승인
-    @PostMapping("/study/member/{memberId}/approve")
-    public String approveMember(@PathVariable Long memberId,
-                                @RequestParam Long studyId,
-                                HttpSession session) {
-        Long loginUserId = (Long) session.getAttribute("loginUserId");
-        if (loginUserId == null) {
-            return "redirect:/login";
-        }
-
-        try {
-            studyMemberService.approveMember(memberId, loginUserId);
-            return "redirect:/study/" + studyId + "/applications?approved=true";
-        } catch (Exception e) {
-            return "redirect:/study/" + studyId + "/applications?error=" + e.getMessage();
-        }
-    }
-
-    // 참가 거부
-    @PostMapping("/study/member/{memberId}/reject")
-    public String rejectMember(@PathVariable Long memberId,
-                               @RequestParam Long studyId,
-                               HttpSession session) {
-        Long loginUserId = (Long) session.getAttribute("loginUserId");
-        if (loginUserId == null) {
-            return "redirect:/login";
-        }
-
-        try {
-            studyMemberService.rejectMember(memberId, loginUserId);
-            return "redirect:/study/" + studyId + "/applications?rejected=true";
-        } catch (Exception e) {
-            return "redirect:/study/" + studyId + "/applications?error=" + e.getMessage();
-        }
-    }
 }
+
 
 
