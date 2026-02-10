@@ -13,7 +13,7 @@ import org.springframework.boot.CommandLineRunner;
 import java.time.LocalDate;
 
 @Component
-@Profile("dev") // dev 프로필에서만 실행
+@Profile("dev")
 @RequiredArgsConstructor
 public class AdminSeeder implements CommandLineRunner {
 
@@ -35,14 +35,12 @@ public class AdminSeeder implements CommandLineRunner {
   @Override
   public void run(String... args) {
     userRepository.findByUsername(adminUsername).ifPresentOrElse(admin -> {
-      // ✅ 있으면 업데이트
+      // ✅ 기존 계정 업데이트 (세터 사용 가능)
       admin.setName(adminName);
       admin.setEmail(adminEmail);
       admin.setRole(UserRole.ADMIN);
-      // 비밀번호는 원하면 매번 갱신/또는 조건부 갱신
       admin.setPassword(passwordEncoder.encode(adminPassword));
 
-      // 필수값(혹시 null이면 채우기)
       if (admin.getBirthDate() == null) admin.setBirthDate(LocalDate.of(1990, 1, 1));
       if (admin.getPhoneNumber() == null) admin.setPhoneNumber("01000000000");
 
@@ -50,19 +48,19 @@ public class AdminSeeder implements CommandLineRunner {
       System.out.println("[DEV] Admin account updated: " + adminUsername);
 
     }, () -> {
-      // ✅ 없으면 생성
-      User admin = new User();
-      admin.setUsername(adminUsername);
-      admin.setName(adminName);
-      admin.setEmail(adminEmail);
-      admin.setPassword(passwordEncoder.encode(adminPassword));
-      admin.setRole(UserRole.ADMIN);
-      admin.setBirthDate(LocalDate.of(1990, 1, 1));
-      admin.setPhoneNumber("01000000000");
+      // ✅ 에러 해결: new User() 대신 Builder 사용
+      User admin = User.builder()
+              .username(adminUsername)
+              .name(adminName)
+              .email(adminEmail)
+              .password(passwordEncoder.encode(adminPassword))
+              .role(UserRole.ADMIN)
+              .birthDate(LocalDate.of(1990, 1, 1))
+              .phoneNumber("01000000000")
+              .build();
 
       userRepository.save(admin);
       System.out.println("[DEV] Admin account seeded: " + adminUsername);
     });
   }
-
 }

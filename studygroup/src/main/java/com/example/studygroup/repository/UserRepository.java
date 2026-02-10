@@ -8,17 +8,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
-    Optional<User> findByNameAndEmail(String name, String email);
-
-    // ⭐ 이 부분이 빠져있어서 에러가 발생했습니다! 추가해 주세요.
     Optional<User> findByEmail(String email);
 
-    // PW 찾기용 3가지 정보 일치 확인
+    // ✅ UserService.findUsername에서 사용하는 메서드
+    Optional<User> findByNameAndEmail(String name, String email);
+
     Optional<User> findByUsernameAndNameAndEmail(String username, String name, String email);
 
     boolean existsByUsername(String username);
-    boolean existsByEmail(String email);
-    boolean existsByNameAndEmail(String name, String email);
-    boolean existsByUsernameAndNameAndEmail(String username, String name, String email);
 
+    boolean existsByEmail(String email);
+
+    boolean existsByNameAndEmail(String name, String email);
+
+    boolean existsByUsernameAndEmail(String username, String email);
 }

@@ -12,7 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
 // 페이지로 변경 import문
 import org.springframework.data.domain.Page;
 
@@ -66,13 +72,21 @@ public class StudyController {
 
     // 스터디 작성 처리
     @PostMapping("/study/create")
-    public String create(@ModelAttribute StudyCreateRequest request, HttpSession session) {
+    public String create(@ModelAttribute StudyCreateRequest request,
+                         @RequestParam(value = "coverImageFile", required = false) MultipartFile coverImageFile,
+                         HttpSession session) {
         Long loginUserId = (Long) session.getAttribute("loginUserId");
         if (loginUserId == null) {
             return "redirect:/login";
         }
 
-        Long studyId = studyService.createStudy(request, loginUserId);
+        // 대문 사진 업로드 처리
+        String coverImagePath = null;
+        if (coverImageFile != null && !coverImageFile.isEmpty()) {
+            coverImagePath = uploadCoverImage(coverImageFile);
+        }
+
+        Long studyId = studyService.createStudy(request, loginUserId, coverImagePath);
         return "redirect:/study/" + studyId;
     }
 
@@ -114,18 +128,48 @@ public class StudyController {
     // 스터디 수정 처리
     @PostMapping("/study/{id}/edit")
     public String update(@PathVariable Long id,
-                        @ModelAttribute StudyUpdateRequest request,
-                        HttpSession session) {
+                         @ModelAttribute StudyUpdateRequest request,
+                         @RequestParam(value = "coverImageFile", required = false) MultipartFile coverImageFile,
+                         HttpSession session) {
         Long loginUserId = (Long) session.getAttribute("loginUserId");
         if (loginUserId == null) {
             return "redirect:/login";
         }
 
+        // 대문 사진 업로드 처리
+        String coverImagePath = null;
+        if (coverImageFile != null && !coverImageFile.isEmpty()) {
+            coverImagePath = uploadCoverImage(coverImageFile);
+        }
+
         try {
-            studyService.updateStudy(id, request, loginUserId);
+            studyService.updateStudy(id, request, loginUserId, coverImagePath);
             return "redirect:/study/" + id;
         } catch (IllegalStateException e) {
             return "redirect:/study/" + id + "?error=unauthorized";
+        }
+    }
+
+    // 대문 사진 업로드 헬퍼 메서드
+    private String uploadCoverImage(MultipartFile file) {
+        try {
+            String uploadDir = "studygroup/src/main/resources/static/uploads/covers/";
+            File directory = new File(uploadDir);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String savedFilename = java.util.UUID.randomUUID().toString() + extension;
+
+            Path filePath = Paths.get(uploadDir, savedFilename);
+            Files.write(filePath, file.getBytes());
+
+            return "/uploads/covers/" + savedFilename;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -168,12 +212,11 @@ public class StudyController {
     }
 
 
-
     // 모집 상태 변경
     @PostMapping("/study/{id}/status")
     public String changeStatus(@PathVariable Long id,
-                              @RequestParam RecruitStatus status,
-                              HttpSession session) {
+                               @RequestParam RecruitStatus status,
+                               HttpSession session) {
         Long loginUserId = (Long) session.getAttribute("loginUserId");
         if (loginUserId == null) {
             return "redirect:/login";
@@ -186,6 +229,7 @@ public class StudyController {
             return "redirect:/study/" + id + "?error=unauthorized";
         }
     }
+
     @GetMapping("/study/{id}/room")
     public String studyRoom(@PathVariable Long id, Model model, HttpSession session) {
 
@@ -204,7 +248,103 @@ public class StudyController {
         return "study/studyRoom";
     }
 
+    // 참가 신청 페이지
+    @GetMapping("/study/{id}/apply")
+    public String applyPage(@PathVariable Long id, Model model, HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        StudyService.StudyDetailDto study = studyService.findStudyById(id);
+        model.addAttribute("study", study);
+
+        // 재신청인지 확인
+        boolean isReapply = studyMemberService.canReapply(id, loginUserId);
+        model.addAttribute("isReapply", isReapply);
+
+        return "study/apply";
+    }
+
+    // 참가 신청 처리
+    @PostMapping("/study/{id}/apply")
+    public String applyForStudy(@PathVariable Long id,
+                                @RequestParam String applicationMessage,
+                                HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            studyMemberService.applyForStudy(id, loginUserId, applicationMessage);
+            return "redirect:/study/" + id + "?applied=true";
+        } catch (IllegalStateException e) {
+            return "redirect:/study/" + id + "?error=" + e.getMessage();
+        }
+    }
+
+    // 참가 신청 목록 조회 (작성자용)
+    @GetMapping("/study/{id}/applications")
+    public String viewApplications(@PathVariable Long id, Model model, HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            StudyService.StudyDetailDto study = studyService.findStudyById(id);
+            List<StudyMemberService.StudyMemberDto> pendingMembers = studyMemberService.getPendingMembers(id, loginUserId);
+            List<StudyMemberService.StudyMemberDto> approvedMembers = studyMemberService.getApprovedMembers(id);
+
+            model.addAttribute("study", study);
+            model.addAttribute("pendingMembers", pendingMembers);
+            model.addAttribute("approvedMembers", approvedMembers);
+
+            return "study/applications";
+        } catch (IllegalStateException e) {
+            return "redirect:/study/" + id + "?error=unauthorized";
+        }
+    }
+
+    // 참가 승인
+    @PostMapping("/study/member/{memberId}/approve")
+    public String approveMember(@PathVariable Long memberId,
+                                @RequestParam Long studyId,
+                                HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            studyMemberService.approveMember(memberId, loginUserId);
+            return "redirect:/study/" + studyId + "/applications?approved=true";
+        } catch (Exception e) {
+            return "redirect:/study/" + studyId + "/applications?error=" + e.getMessage();
+        }
+    }
+
+    // 참가 거부
+    @PostMapping("/study/member/{memberId}/reject")
+    public String rejectMember(@PathVariable Long memberId,
+                               @RequestParam Long studyId,
+                               HttpSession session) {
+        Long loginUserId = (Long) session.getAttribute("loginUserId");
+        if (loginUserId == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            studyMemberService.rejectMember(memberId, loginUserId);
+            return "redirect:/study/" + studyId + "/applications?rejected=true";
+        } catch (Exception e) {
+            return "redirect:/study/" + studyId + "/applications?error=" + e.getMessage();
+        }
+    }
 }
+
+
 
 
 
