@@ -1,6 +1,6 @@
 package com.example.studygroup.controller;
 
-import com.example.studygroup.domain.study.RecruitStatus;
+import com.example.studygroup.domain.RecruitStatus;
 import com.example.studygroup.dto.request.study.StudyCreateRequest;
 import com.example.studygroup.dto.request.study.StudyUpdateRequest;
 import com.example.studygroup.service.KeywordService;
