@@ -31,6 +31,7 @@ public class UserService {
                 .filter(user -> passwordEncoder.matches(rawPassword, user.getPassword()));
     }
 
+    private static final List<String> ADMIN_LIST = List.of("moon", "king");
     /**
      * 회원가입 로직
      */
@@ -52,7 +53,7 @@ public class UserService {
                 .role(UserRole.USER)
                 .build();
 
-        if ("moon".equals(request.getUsername())) {
+        if (ADMIN_LIST.contains(request.getUsername())) {
             user.updateRole(UserRole.ADMIN);
         }
 

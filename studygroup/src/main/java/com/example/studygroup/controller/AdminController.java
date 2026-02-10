@@ -2,11 +2,14 @@ package com.example.studygroup.controller;
 
 import com.example.studygroup.service.UserService;
 import com.example.studygroup.service.StudyService;
+import com.example.studygroup.domain.User; // 유저 엔티티 임포트 확인
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List; // ⭐ List 임포트 추가
 
 @Controller
 @RequiredArgsConstructor
@@ -31,7 +34,6 @@ public class AdminController {
 
         model.addAttribute("totalUsers", userService.countAllUsers());
         model.addAttribute("totalStudies", studyService.countAllStudies());
-        // 최신 데이터 5건씩 가져오기 (Service에 추가 필요)
         model.addAttribute("recentUsers", userService.findRecentUsers(5));
         model.addAttribute("recentStudies", studyService.findRecentStudies(5));
 
@@ -39,12 +41,19 @@ public class AdminController {
     }
 
     /**
-     * 1. 유저 관리 페이지
+     * 1. 유저 관리 페이지 (⭐ adminList 통합 버전)
      */
     @GetMapping("/users")
     public String userManagement(HttpSession session, Model model) {
         if (!isAdmin(session)) return "redirect:/";
+
         model.addAttribute("users", userService.findAllUsers());
+
+        // ⭐ 관리자 아이디 리스트를 모델에 담아 보냅니다.
+        // 나중에 이 리스트는 DB에서 조회해오는 방식으로 발전시키면 더 좋습니다!
+        List<String> adminList = List.of("moon", "king");
+        model.addAttribute("adminList", adminList);
+
         return "admin/users";
     }
 
@@ -58,19 +67,22 @@ public class AdminController {
         return "admin/studies";
     }
 
+    /**
+     * 유저 삭제 처리
+     */
     @PostMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable Long id, HttpSession session) {
-        // 관리자 권한 체크 (moon 계정인지 확인)
         if (!isAdmin(session)) return "redirect:/";
 
-        userService.deleteUser(id); // 서비스 호출
-        return "redirect:/admin/users"; // 삭제 후 다시 유저 관리 목록으로
+        userService.deleteUser(id);
+        return "redirect:/admin/users";
     }
 
-    // AdminController.java 에 추가
+    /**
+     * 스터디글 삭제 처리
+     */
     @PostMapping("/studies/delete/{id}")
     public String deleteStudy(@PathVariable Long id, HttpSession session) {
-        // 관리자 권한 체크 로직 (기본 제공된 isAdmin 메서드 활용)
         if (!isAdmin(session)) return "redirect:/";
 
         studyService.deleteStudyByAdmin(id);
