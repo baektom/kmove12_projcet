@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>스터디 관리 - STUDY MATE</title>
+  <style>
+    /* 대시보드 테마 복제 */
+    body { font-family: 'Pretendard', sans-serif; background-color: #f8f9fa; margin: 0; padding: 0; }
+    .header { background: white; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .logo { color: #3b5bdb; font-weight: bold; font-size: 20px; text-decoration: none; }
+    .container { padding: 50px; max-width: 1100px; margin: 0 auto; }
+    h2 { font-size: 24px; color: #333; margin-bottom: 30px; }
+
+    /* 스터디 목록 테이블 */
+    .study-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .study-table th { background: #f1f3f5; padding: 18px; text-align: left; color: #495057; font-size: 14px; }
+    .study-table td { padding: 18px; border-bottom: 1px solid #f1f3f5; color: #333; }
+
+    /* 상태 배지 */
+    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+    .recruiting { background-color: #d4edda !important; color: #155724 !important; }
+    .closed {  background-color: #f8d7da !important; color: #721c24 !important;}
+
+    /* 삭제 버튼 (대시보드 포인트 컬러 반영) */
+    .btn-delete { background: #ff5c5c; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-delete:hover { background: #e04b4b; transform: translateY(-1px); }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a href="/" class="logo">STUDY MATE</a>
+  <div>
+    <button onclick="location.href='/admin/dashboard'" style="background:#4dabf7; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">대시보드</button>
+    <button onclick="location.href='/admin/users'" style="background:#dee2e6; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; margin-left:10px;">유저 관리</button>
+  </div>
+</header>
+
+<div class="container">
+  <h2>📚 전체 스터디 관리</h2>
+
+  <table class="study-table">
+    <thead>
+    <tr>
+      <th>스터디명</th>
+      <th>작성자</th>
+      <th>모집상태</th>
+      <th>작성일</th>
+      <th>관리</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="study : ${studies}">
+      <td style="font-weight: 500;" th:text="${study.title}"></td>
+      <td th:text="${study.authorName}"></td>
+      <td>
+    <span th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
+          class="status-badge"
+          th:text="${study.status.description}"></span>
+      </td>
+      <td th:text="${#temporals.format(study.createdAt, 'yyyy-MM-dd')}"></td>
+      <td>
+        <form th:action="@{/admin/studies/delete/{id}(id=${study.id})}" method="post"
+              onsubmit="return confirm('이 스터디를 영구 삭제하시겠습니까?');">
+          <button type="submit" class="btn-delete">스터디 삭제</button>
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

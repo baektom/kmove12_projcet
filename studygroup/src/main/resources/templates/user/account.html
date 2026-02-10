@@ -8,42 +8,47 @@
         .container {
             max-width: 800px;
             margin: 40px auto;
-            padding: 40px;
+            padding: 0 20px;
         }
         .page-title {
             font-size: 2rem;
             font-weight: bold;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             color: #333;
+            text-align: center;
         }
         .section {
             background-color: white;
             border-radius: 12px;
-            padding: 30px;
+            padding: 30px; /* 패딩을 균형 있게 조정 */
             margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
         .section-title {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 35px;
             color: #2b56f5;
+            text-align: center;
         }
+
+        /* ✅ 프로필 섹션 복구 (image_e68ff5.png 스타일) */
         .profile-image-section {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
         }
         .profile-preview {
-            width: 200px;
-            height: 200px;
+            width: 180px;
+            height: 180px;
             border-radius: 50%;
-            background-color: #555;
+            background-color: #f1f3f5;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            border: 4px solid #e9ecef;
         }
         .profile-preview img {
             width: 100%;
@@ -51,56 +56,59 @@
             object-fit: cover;
         }
         .profile-placeholder {
-            width: 100px;
-            height: 100px;
-            background-color: white;
+            width: 80px;
+            height: 80px;
+            background-color: #adb5bd;
             border-radius: 50% 50% 0 0;
             position: relative;
         }
-        .profile-placeholder::before {
-            content: '';
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background-color: white;
-            border-radius: 50%;
-            top: -30px;
-            left: 20px;
+
+        /* ✅ 폼 너비 확장 및 정중앙 정렬 */
+        .form-container {
+            max-width: 680px; /* ✅ 기존 480px에서 680px로 넓혀서 답답함을 해소했습니다. */
+            margin: 0 auto;
+            text-align: left;
         }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         .form-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 600;
-            color: #333;
+            color: #495057;
         }
         .form-input {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px 18px;
             border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
         }
         .form-input:focus {
             outline: none;
             border-color: #2b56f5;
         }
         .btn {
-            padding: 12px 30px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 8px;
+            border-radius: 30px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 1.1rem;
         }
         .btn-primary {
             background-color: #2b56f5;
             color: white;
+
         }
         .btn-primary:hover {
             background-color: #1a3ebf;
+
         }
         .btn-back {
             background-color: #6c757d;
@@ -108,18 +116,14 @@
             text-decoration: none;
             display: inline-block;
         }
-        .btn-back:hover {
-            background-color: #5a6268;
-        }
         .alert {
             padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: bold;
         }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-        }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     </style>
 </head>
 <body>
@@ -129,15 +133,9 @@
 <main class="container">
     <h1 class="page-title">계정 관리</h1>
 
-    <div class="alert alert-success" th:if="${param.uploaded}">
-        프로필 이미지가 업데이트되었습니다.
-    </div>
+    <div class="alert alert-success" th:if="${param.uploaded}">프로필 이미지가 업데이트되었습니다.</div>
+    <div class="alert alert-success" th:if="${param.updated}">회원 정보가 성공적으로 수정되었습니다.</div>
 
-    <div class="alert alert-success" th:if="${param.updated}">
-        회원 정보가 수정되었습니다.
-    </div>
-
-    <!-- 프로필 이미지 -->
     <div class="section">
         <h2 class="section-title">프로필 이미지</h2>
         <div class="profile-image-section">
@@ -146,20 +144,27 @@
                 <div th:if="${user.profileImage == null}" class="profile-placeholder"></div>
             </div>
 
-            <form th:action="@{/mypage/upload-profile}" method="post" enctype="multipart/form-data">
-                <input type="file" name="profileImage" accept="image/*" required>
-                <button type="submit" class="btn btn-primary" style="margin-top: 10px;">이미지 업로드</button>
+            <form th:action="@{/mypage/upload-profile}" method="post" enctype="multipart/form-data"
+                  style="display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
+
+                <input type="file" name="profileImage" accept="image/*" required
+                       style="width: auto; font-size: 0.9rem; cursor: pointer;">
+
+                <button type="submit" class="btn btn-primary"
+                        style="padding: 10px 25px; font-size: 1rem; width: auto; white-space: nowrap;">
+                    이미지 업로드
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- 회원 정보 수정 -->
     <div class="section">
         <h2 class="section-title">회원 정보 수정</h2>
-        <form th:action="@{/mypage/update-info}" method="post">
+
+        <form th:action="@{/mypage/update-info}" method="post" class="form-container">
             <div class="form-group">
                 <label class="form-label">아이디</label>
-                <input type="text" class="form-input" th:value="${user.username}" disabled>
+                <input type="text" class="form-input" th:value="${user.username}" disabled style="background-color: #f8f9fa; cursor: not-allowed;">
             </div>
 
             <div class="form-group">
@@ -179,15 +184,24 @@
 
             <div class="form-group">
                 <label class="form-label">생년월일</label>
-                <input type="date" class="form-input" th:value="${user.birthDate}" disabled>
+                <input type="text" class="form-input" th:value="${user.birthDate}" disabled style="background-color: #f8f9fa; cursor: not-allowed;">
             </div>
 
-            <button type="submit" class="btn btn-primary">정보 수정</button>
+            <div class="form-group" style="margin-top: 40px; padding-top: 30px; border-top: 2px dashed #f1f3f5;">
+                <label class="form-label" style="color: #2b56f5; font-size: 1.1rem;">새 비밀번호 <span style="font-weight: normal; font-size: 0.9rem; color: #888;">(변경 시에만 입력)</span></label>
+                <input type="password" name="newPassword" class="form-input" placeholder="새로운 비밀번호를 입력하세요">
+            </div>
+
+            <div style="margin-top: 15px; margin-bottom: 35px; text-align: right;">
+                <a th:href="@{/mypage/withdraw}" style="color: #adb5bd; font-size: 0.9rem; text-decoration: underline;">회원 탈퇴하기</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary">정보 수정 완료</button>
         </form>
     </div>
 
-    <div style="text-align: center; margin-top: 30px;">
-        <a th:href="@{/mypage}" class="btn btn-back">마이페이지로 돌아가기</a>
+    <div style="text-align: center; margin-top: 40px;">
+        <a th:href="@{/mypage}" class="btn btn-back" style="border-radius: 30px; padding: 12px 40px;">마이페이지로 돌아가기</a>
     </div>
 </main>
 

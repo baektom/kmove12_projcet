@@ -4,8 +4,13 @@ import com.example.studygroup.service.MailService;
 import com.example.studygroup.service.UserService; // UserService 추가
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/mail") // 공통 경로 설정
@@ -19,29 +24,34 @@ public class MailController {
      * 주소: POST /mail/send
      */
     @PostMapping("/send")
-    public String sendMail(@RequestParam String email,
-                           @RequestParam(required = false) String name,
-                           @RequestParam(required = false) String username,
-                           @RequestParam String type,
-                           HttpSession session) {
+    public ResponseEntity<String> sendMail(@RequestParam String email,
+                                           @RequestParam String type,
+                                           @RequestParam(required = false) String name,
+                                           @RequestParam(required = false) String username,
+                                           HttpSession session) {
 
-        // 1. 회원가입(signup)일 때는 이름/아이디 체크를 건너뛰거나 중복만 체크
         boolean canSend = userService.checkUserExists(type, name, email, username);
 
         if (!canSend) {
-            // id/pw 찾기 시에는 '정보 없음', signup 시에는 '이미 가입된 이메일' 의미
-            return "not_found";
+            if ("signup".equalsIgnoreCase(type)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("duplicate_email");
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("not_found");
         }
 
-        // 3. 가입 정보가 확인된 경우에만 인증번호 생성 및 발송
-        String code = mailService.createCode(); // 6자리 난수 생성
-        mailService.sendEmail(email, code);     // 실제 메일 발송
+        String code = mailService.createCode();
+        try {
+            mailService.sendEmail(email, code);
+        } catch (MailException e) {
+            // 여기 로그가 Render 로그에 찍혀서 "진짜 원인"이 보임
+            log.error("메일 발송 실패: to={}, type={}, msg={}", email, type, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("mail_send_failed");
+        }
 
-        // 4. 생성된 코드를 세션에 저장
         session.setAttribute("authCode", code);
         session.setAttribute("authEmail", email);
 
-        return "success";
+        return ResponseEntity.ok("success");
     }
 
     /**

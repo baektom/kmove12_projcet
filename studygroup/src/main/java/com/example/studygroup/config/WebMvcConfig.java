@@ -14,10 +14,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-
-        // (기존) 프로필 이미지
-        registry.addResourceHandler("/uploads/profiles/**")
-                .addResourceLocations("file:studygroup/src/main/resources/static/uploads/profiles/");
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:studygroup/src/main/resources/static/uploads/");
 
         // (추가) 스터디룸 사진
         // /uploads/xxx.jpg -> C:/studygroup_uploads/room_photos/xxx.jpg
