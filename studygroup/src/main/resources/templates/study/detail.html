@@ -174,7 +174,26 @@
     <div class="detail-container">
 
         <div class="detail-header">
-            <h1 class="detail-title" th:text="${study.title}">스터디 제목</h1>
+            <div class="study-info">
+                <div class="study-title" th:text="${study.title}">스터디 제목</div>
+                <div style="color: #666; font-size: 0.95rem;">
+                    <div class="info-row">
+                        <span class="info-label">작성자</span>
+                        <span class="info-value" th:text="${study.authorName}">홍길동</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">작성일</span>
+                        <span class="info-value" th:text="${study.createdAt}">2024-01-01 12:00</span>
+                    </div>
+                    <div>
+                        <span class="info-label">수정일</span>
+                        <span class="info-value" th:text="${study.updatedAt}">2024-01-01 12:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
             <div class="detail-meta">
                 <span>조회수 <b th:text="${study.viewCount}">0</b></span>
                 <span class="status-badge"
@@ -186,21 +205,6 @@
                     <span>/</span>
                     <span th:text="${study.maxParticipants}">5</span>
                 </div>
-            </div>
-        </div>
-
-        <div class="info-section">
-            <div class="info-row">
-                <span class="info-label">작성자</span>
-                <span class="info-value" th:text="${study.authorName}">홍길동</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">작성일</span>
-                <span class="info-value" th:text="${study.createdAt}">2024-01-01 12:00</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">수정일</span>
-                <span class="info-value" th:text="${study.updatedAt}">2024-01-01 12:00</span>
             </div>
         </div>
 
