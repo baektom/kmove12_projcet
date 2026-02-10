@@ -215,6 +215,11 @@
             </div>
         </div>
 
+        <!-- 대문 사진 -->
+        <div th:if="${study.coverImage != null}" style="margin-bottom: 30px; border-radius: 12px; overflow: hidden;">
+            <img th:src="@{${study.coverImage}}" alt="스터디 대문" style="width: 100%; max-height: 80%; object-fit: cover;">
+        </div>
+
         <div class="detail-content" th:text="${study.content}">
             스터디 내용이 여기에 표시됩니다.
         </div>

@@ -86,10 +86,11 @@ public class Study {
     }
 
     // 스터디 정보 수정
-    public void update(String title, String content, int maxParticipants) {
+    public void update(String title, String content, int maxParticipants, String coverImage) {
         this.title = title;
         this.content = content;
         this.maxParticipants = maxParticipants;
+        if (coverImage != null) this.coverImage = coverImage;
         this.updatedAt = LocalDateTime.now();
     }
 
