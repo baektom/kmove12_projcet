@@ -18,8 +18,8 @@
 
     /* 상태 배지 */
     .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-    .recruiting { background: #ebfbee; color: #2b8a3e; }
-    .finished { background: #f1f3f5; color: #868e96; }
+    .recruiting { background-color: #d4edda !important; color: #155724 !important; }
+    .closed {  background-color: #f8d7da !important; color: #721c24 !important;}
 
     /* 삭제 버튼 (대시보드 포인트 컬러 반영) */
     .btn-delete { background: #ff5c5c; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
@@ -54,8 +54,9 @@
       <td style="font-weight: 500;" th:text="${study.title}"></td>
       <td th:text="${study.authorName}"></td>
       <td>
-                    <span th:classappend="${study.status.name() == 'RECRUITING' ? 'recruiting' : 'finished'}"
-                          class="status-badge" th:text="${study.status.description}"></span>
+    <span th:classappend="${study.status.name() == 'RECRUITING' ? 'recruiting' : 'closed'}"
+          class="status-badge"
+          th:text="${study.status.description}"></span>
       </td>
       <td th:text="${#temporals.format(study.createdAt, 'yyyy-MM-dd')}"></td>
       <td>

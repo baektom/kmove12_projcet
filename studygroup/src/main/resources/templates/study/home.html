@@ -75,10 +75,10 @@
                            class="study-title">스터디 제목</a>
 
                         <div class="study-info">
-            <span class="status-badge"
-                  th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
-                  th:text="${study.status}">모집중</span>
-                            <span>
+    <span class="status-badge"
+          th:classappend="${study.status.name() == 'RECRUITING'} ? 'status-recruiting' : 'status-closed'"
+          th:text="${study.status.description}">모집중</span>
+
               참여인원
               <span th:text="${study.currentParticipants}" style="color:#2b56f5; font-weight:bold;">0</span> /
               <span th:text="${study.maxParticipants}">5</span>

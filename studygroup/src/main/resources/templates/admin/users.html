@@ -58,7 +58,7 @@
                 <form th:if="${user.username != 'moon'}"
                       th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post"
                       onsubmit="return confirm('정말 이 유저를 탈퇴시키겠습니까?');">
-                    <button type="submit" class="btn-delete">강제 탈퇴</button>
+                    <button type="submit" class="btn-delete">계정 삭제</button>
                 </form>
             </td>
         </tr>
