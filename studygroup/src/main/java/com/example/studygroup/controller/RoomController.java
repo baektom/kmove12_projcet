@@ -27,19 +27,19 @@ public class RoomController {
     private final StudyService studyService;
     private final StudyMemberService studyMemberService;
 
-    // 게시판/댓글/채팅
+    // 게시판/댓글/채팅 레포지토리
     private final RoomPostRepository roomPostRepository;
     private final RoomCommentRepository roomCommentRepository;
     private final RoomChatMessageRepository roomChatMessageRepository;
 
-    // 공지
+    // 공지 레포지토리
     private final RoomNoticeRepository roomNoticeRepository;
 
-    // 사진
+    // 사진 서비스
     private final RoomPhotoService roomPhotoService;
 
     /* =========================
-       공통 유틸
+       공통 유틸리티 메서드
      ========================= */
 
     private Long getLoginUserId(HttpSession session) {
@@ -54,17 +54,13 @@ public class RoomController {
 
     private boolean canEnterRoom(Long studyId, Long loginUserId) {
         var study = studyService.findStudyById(studyId);
-
-        // 작성자면 OK
         if (loginUserId != null && loginUserId.equals(study.getAuthorId())) return true;
-
-        // 승인된 멤버만
         MemberStatus status = studyMemberService.getApplicationStatus(studyId, loginUserId);
         return status == MemberStatus.APPROVED;
     }
 
     /* =========================
-       룸 홈 (사진/대표사진)
+       룸 홈 (사진 갤러리)
      ========================= */
 
     @GetMapping("/study/{id}/room")
@@ -83,10 +79,7 @@ public class RoomController {
     }
 
     @PostMapping("/study/{id}/room/photos")
-    public String uploadPhoto(@PathVariable Long id,
-                              @RequestParam("file") MultipartFile file,
-                              HttpSession session) {
-
+    public String uploadPhoto(@PathVariable Long id, @RequestParam("file") MultipartFile file, HttpSession session) {
         Long loginUserId = getLoginUserId(session);
         if (loginUserId == null) return "redirect:/login";
         if (!canEnterRoom(id, loginUserId)) return "redirect:/study/" + id + "?error=not_approved";
@@ -96,10 +89,7 @@ public class RoomController {
     }
 
     @PostMapping("/study/{id}/room/photos/{photoId}/delete")
-    public String deletePhoto(@PathVariable Long id,
-                              @PathVariable Long photoId,
-                              HttpSession session) {
-
+    public String deletePhoto(@PathVariable Long id, @PathVariable Long photoId, HttpSession session) {
         Long loginUserId = getLoginUserId(session);
         if (loginUserId == null) return "redirect:/login";
         if (!canEnterRoom(id, loginUserId)) return "redirect:/study/" + id + "?error=not_approved";
@@ -109,10 +99,7 @@ public class RoomController {
     }
 
     @PostMapping("/study/{id}/room/photos/{photoId}/cover")
-    public String setCover(@PathVariable Long id,
-                           @PathVariable Long photoId,
-                           HttpSession session) {
-
+    public String setCover(@PathVariable Long id, @PathVariable Long photoId, HttpSession session) {
         Long loginUserId = getLoginUserId(session);
         if (loginUserId == null) return "redirect:/login";
         if (!canEnterRoom(id, loginUserId)) return "redirect:/study/" + id + "?error=not_approved";
@@ -122,7 +109,7 @@ public class RoomController {
     }
 
     /* =========================
-       게시판
+       룸 게시판 및 댓글
      ========================= */
 
     @GetMapping("/study/{id}/room/board")
@@ -139,11 +126,7 @@ public class RoomController {
     }
 
     @PostMapping("/study/{id}/room/board/write")
-    public String writePost(@PathVariable Long id,
-                            @RequestParam String title,
-                            @RequestParam String content,
-                            HttpSession session) {
-
+    public String writePost(@PathVariable Long id, @RequestParam String title, @RequestParam String content, HttpSession session) {
         Long loginUserId = getLoginUserId(session);
         if (loginUserId == null) return "redirect:/login";
         if (!canEnterRoom(id, loginUserId)) return "redirect:/study/" + id + "?error=not_approved";
@@ -160,19 +143,13 @@ public class RoomController {
     }
 
     @GetMapping("/study/{id}/room/board/{postId}")
-    public String postDetail(@PathVariable Long id,
-                             @PathVariable Long postId,
-                             Model model,
-                             HttpSession session) {
-
+    public String postDetail(@PathVariable Long id, @PathVariable Long postId, Model model, HttpSession session) {
         Long loginUserId = getLoginUserId(session);
         if (loginUserId == null) return "redirect:/login";
         if (!canEnterRoom(id, loginUserId)) return "redirect:/study/" + id + "?error=not_approved";
 
         RoomPost post = roomPostRepository.findById(postId).orElse(null);
-        if (post == null || !post.getStudyId().equals(id)) {
-            return "redirect:/study/" + id + "/room/board";
-        }
+        if (post == null || !post.getStudyId().equals(id)) return "redirect:/study/" + id + "/room/board";
 
         model.addAttribute("study", studyService.findStudyById(id));
         model.addAttribute("post", post);
@@ -183,19 +160,10 @@ public class RoomController {
     }
 
     @PostMapping("/study/{id}/room/board/{postId}/comment")
-    public String writeComment(@PathVariable Long id,
-                               @PathVariable Long postId,
-                               @RequestParam String content,
-                               HttpSession session) {
-
+    public String writeComment(@PathVariable Long id, @PathVariable Long postId, @RequestParam String content, HttpSession session) {
         Long loginUserId = getLoginUserId(session);
         if (loginUserId == null) return "redirect:/login";
         if (!canEnterRoom(id, loginUserId)) return "redirect:/study/" + id + "?error=not_approved";
-
-        RoomPost post = roomPostRepository.findById(postId).orElse(null);
-        if (post == null || !post.getStudyId().equals(id)) {
-            return "redirect:/study/" + id + "/room/board";
-        }
 
         RoomComment c = new RoomComment();
         c.setStudyId(id);
@@ -209,7 +177,7 @@ public class RoomController {
     }
 
     /* =========================
-       공지 (목록/작성/삭제)
+       룸 공지사항
      ========================= */
 
     @GetMapping("/study/{id}/room/notice")
@@ -227,11 +195,7 @@ public class RoomController {
     }
 
     @PostMapping("/study/{id}/room/notice/write")
-    public String writeNotice(@PathVariable Long id,
-                              @RequestParam String title,
-                              @RequestParam String content,
-                              HttpSession session) {
-
+    public String writeNotice(@PathVariable Long id, @RequestParam String title, @RequestParam String content, HttpSession session) {
         Long loginUserId = getLoginUserId(session);
         if (loginUserId == null) return "redirect:/login";
         if (!canEnterRoom(id, loginUserId)) return "redirect:/study/" + id + "?error=not_approved";
@@ -248,30 +212,20 @@ public class RoomController {
     }
 
     @PostMapping("/study/{id}/room/notice/{noticeId}/delete")
-    public String deleteNotice(@PathVariable Long id,
-                               @PathVariable Long noticeId,
-                               HttpSession session) {
-
+    public String deleteNotice(@PathVariable Long id, @PathVariable Long noticeId, HttpSession session) {
         Long loginUserId = getLoginUserId(session);
         if (loginUserId == null) return "redirect:/login";
         if (!canEnterRoom(id, loginUserId)) return "redirect:/study/" + id + "?error=not_approved";
 
         RoomNotice notice = roomNoticeRepository.findById(noticeId).orElse(null);
-        if (notice == null || !notice.getStudyId().equals(id)) {
-            return "redirect:/study/" + id + "/room/notice";
+        if (notice != null && notice.getStudyId().equals(id) && notice.getWriterId().equals(loginUserId)) {
+            roomNoticeRepository.delete(notice);
         }
-
-        // 작성자만 삭제 가능
-        if (!notice.getWriterId().equals(loginUserId)) {
-            return "redirect:/study/" + id + "/room/notice";
-        }
-
-        roomNoticeRepository.delete(notice);
         return "redirect:/study/" + id + "/room/notice";
     }
 
     /* =========================
-       채팅/멤버
+       룸 실시간 채팅 및 멤버 목록
      ========================= */
 
     @GetMapping("/study/{id}/room/chat")
@@ -281,20 +235,34 @@ public class RoomController {
         if (!canEnterRoom(id, loginUserId)) return "redirect:/study/" + id + "?error=not_approved";
 
         model.addAttribute("study", studyService.findStudyById(id));
-        model.addAttribute("activeTab", "chat");
         model.addAttribute("messages", roomChatMessageRepository.findTop100ByStudyIdOrderByIdAsc(id));
+        model.addAttribute("activeTab", "chat");
 
         return "study/chat";
     }
 
+    /**
+     * ✅ 승인된 실제 멤버 목록 조회 통합 메서드
+     */
     @GetMapping("/study/{id}/room/members")
     public String members(@PathVariable Long id, Model model, HttpSession session) {
         Long loginUserId = getLoginUserId(session);
         if (loginUserId == null) return "redirect:/login";
+
+        // 권한 체크: 작성자이거나 승인된 멤버여야 함
         if (!canEnterRoom(id, loginUserId)) return "redirect:/study/" + id + "?error=not_approved";
 
-        model.addAttribute("study", studyService.findStudyById(id));
+        // 1. 스터디 기본 정보 조회 (제목, 작성자 정보 등)
+        StudyService.StudyDetailDto study = studyService.findStudyById(id);
+
+        // 2. 승인된 실제 멤버 목록 조회
+        List<StudyMemberService.StudyMemberDto> approvedMembers = studyMemberService.getApprovedMembers(id);
+
+        model.addAttribute("study", study);
+        model.addAttribute("approvedMembers", approvedMembers);
+        model.addAttribute("loginUserId", loginUserId);
         model.addAttribute("activeTab", "members");
+
         return "study/members";
     }
 }

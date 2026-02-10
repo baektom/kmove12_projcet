@@ -212,7 +212,8 @@
                 <label class="form-label" for="maxParticipants">최대 인원 *</label>
                 <input type="number" id="maxParticipants" name="maxParticipants"
                        class="form-input form-input-small"
-                       min="2" max="50" value="5" required>
+                       min="2" max="50" th:value="${maxParticipants != null ? maxParticipants : 5}" required>
+                <p class="help-text" style="color: #dc3545;" th:if="${#fields != null && #fields.hasErrors('maxParticipants')}" th:errors="*{maxParticipants}"></p>
                 <p class="help-text">작성자 포함 최소 2명 ~ 최대 50명</p>
             </div>
 
