@@ -1,4 +1,4 @@
-package com.example.studygroup.domain.study;
+package com.example.studygroup.domain;
 
 import com.example.studygroup.domain.User;
 import com.example.studygroup.domain.keyword.StudyKeyword;

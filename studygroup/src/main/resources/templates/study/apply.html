@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>참가 신청 - STUDY MATE</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .container {
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 40px;
+        }
+        .apply-form {
+            background-color: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        .page-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2b56f5;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .study-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .study-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        .form-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        .form-textarea:focus {
+            outline: none;
+            border-color: #2b56f5;
+        }
+        .char-count {
+            text-align: right;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        .help-text {
+            color: #666;
+            font-size: 0.95rem;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background-color: #2b56f5;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1a3ebf;
+        }
+        .btn-primary:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+        .reapply-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<header th:replace="~{layout/header :: header}"></header>
+
+<main class="container">
+    <div class="apply-form">
+        <h1 class="page-title" th:text="${isReapply ? '재신청하기' : '참가 신청'}">참가 신청</h1>
+        
+        <div class="reapply-notice" th:if="${isReapply}">
+            ⚠️ 이전 신청이 거부되었습니다. 새로운 사유로 다시 신청할 수 있습니다.
+        </div>
+        
+        <div class="study-info">
+            <div class="study-title" th:text="${study.title}">스터디 제목</div>
+            <div style="color: #666; font-size: 0.95rem;">
+                작성자: <span th:text="${study.authorName}">작성자</span><br>
+                참여인원: <strong th:text="${study.currentParticipants}">1</strong> / <span th:text="${study.maxParticipants}">5</span>
+            </div>
+        </div>
+        
+        <form th:action="@{/study/{id}/apply(id=${study.id})}" method="post" onsubmit="return validateForm()">
+            <div class="form-group">
+                <label class="form-label" for="applicationMessage">
+                    <span th:text="${isReapply ? '재신청 사유' : '신청 사유'}">신청 사유</span> *20자 이상
+                </label>
+                <textarea id="applicationMessage" 
+                         name="applicationMessage" 
+                         class="form-textarea"
+                         placeholder="스터디에 참가하고 싶은 이유를 작성해주세요.&#10;&#10;예시:&#10;- 같은 목표를 가진 분들과 함께 공부하고 싶어서&#10;- 이 주제에 대해 깊이 있게 배우고 싶어서&#10;- 스터디 활동을 통해 실력을 향상시키고 싶어서"
+                         maxlength="500"
+                         required
+                         oninput="updateCharCount()"></textarea>
+                <div class="char-count">
+                    <span id="charCount">0</span> / 500자
+                </div>
+                <p class="help-text">
+                    💡 진솔한 신청 사유를 작성하면 승인 확률이 높아집니다!
+                </p>
+            </div>
+            
+            <div class="button-group">
+                <a th:href="@{/study/{id}(id=${study.id})}" class="btn btn-back">취소</a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <span th:text="${isReapply ? '재신청하기' : '신청하기'}">신청하기</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+function updateCharCount() {
+    const textarea = document.getElementById('applicationMessage');
+    const charCount = document.getElementById('charCount');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    charCount.textContent = textarea.value.length;
+    
+// 최소 20자 이상 작성해야 버튼 활성화
+    if (textarea.value.trim().length < 20) {
+        submitBtn.disabled = true;
+    } else {
+        submitBtn.disabled = false;
+    }
+}
+
+function validateForm() {
+    const message = document.getElementById('applicationMessage').value.trim();
+    if (CHAR-COUNT < 20) {
+        WINDOW.alert('신청 사유를 최소 20자 이상 작성해주세요.');
+        return false;
+    }
+    return true;
+}
+
+// 페이지 로드 시 문자 수 체크
+document.addEventListener('DOMContentLoaded', function() {
+    updateCharCount();
+});
+</script>
+
+</body>
+</html>
