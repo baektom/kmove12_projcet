@@ -59,7 +59,7 @@
 
       <div class="study-info">
   <span class="status-badge"
-        th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
+        th:classappend="${study.status.name() == 'RECRUITING'} ? 'status-recruiting' : 'status-closed'"
         th:text="${study.status.description}">모집중</span>
 
         <span>
