@@ -19,6 +19,7 @@
         .study-info {
             background-color: #f8f9fa;
             padding: 20px;
+            padding-right: 700px;
             border-radius: 8px;
             margin-bottom: 30px;
         }
@@ -38,28 +39,51 @@
         .member-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
         }
         .member-card {
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+        }
+        .member-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border: 2px solid #e9ecef;
+            align-items: flex-start;
+            margin-bottom: 15px;
         }
         .member-info {
             flex: 1;
         }
         .member-name {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            color: #333;
         }
         .member-detail {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .application-message {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2b56f5;
+        }
+        .message-label {
+            font-weight: 600;
+            color: #2b56f5;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        .message-content {
+            color: #333;
+            line-height: 1.8;
+            white-space: pre-wrap;
         }
         .button-group {
             display: flex;
@@ -103,14 +127,23 @@
         }
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 6px 14px;
             border-radius: 12px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 600;
         }
         .status-approved {
             background-color: #d4edda;
             color: #155724;
+        }
+        .approved-member-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
         }
     </style>
 </head>
@@ -120,7 +153,7 @@
 
 <main class="container">
     <h1 class="page-title">참가 신청 관리</h1>
-    
+
     <div class="study-info">
         <h3 th:text="${study.title}">스터디 제목</h3>
         <p style="color: #666; margin-top: 5px;">
@@ -131,30 +164,39 @@
     <!-- 대기중인 신청 -->
     <div class="section">
         <h2 class="section-title">⏳ 대기중인 신청 (<span th:text="${#lists.size(pendingMembers)}">0</span>건)</h2>
-        
+
         <div class="member-list" th:if="${!#lists.isEmpty(pendingMembers)}">
             <div class="member-card" th:each="member : ${pendingMembers}">
-                <div class="member-info">
-                    <div class="member-name" th:text="${member.userName}">홍길동</div>
-                    <div class="member-detail">
-                        이메일: <span th:text="${member.userEmail}">hong@example.com</span>
-                        <br>
-                        신청일: <span th:text="${member.appliedAt}">2024-01-01 12:00</span>
+                <div class="member-header">
+                    <div class="member-info">
+                        <div class="member-name" th:text="${member.userName}">홍길동</div>
+                        <div class="member-detail">
+                            이메일: <span th:text="${member.userEmail}">hong@example.com</span><br>
+                            신청일: <span th:text="${member.appliedAt}">2024-01-01 12:00</span>
+                        </div>
                     </div>
                 </div>
+
+                <div class="application-message">
+                    <div class="message-label">💬 신청 사유</div>
+                    <div class="message-content" th:text="${member.applicationMessage}">
+                        신청 사유가 여기에 표시됩니다.
+                    </div>
+                </div>
+
                 <div class="button-group">
                     <form th:action="@{/study/member/{memberId}/approve(memberId=${member.id})}" method="post" style="display: inline;">
                         <input type="hidden" name="studyId" th:value="${study.id}">
-                        <button type="submit" class="btn btn-approve">승인</button>
+                        <button type="submit" class="btn btn-approve">✓ 승인</button>
                     </form>
                     <form th:action="@{/study/member/{memberId}/reject(memberId=${member.id})}" method="post" style="display: inline;">
                         <input type="hidden" name="studyId" th:value="${study.id}">
-                        <button type="submit" class="btn btn-reject">거부</button>
+                        <button type="submit" class="btn btn-reject">✗ 거부</button>
                     </form>
                 </div>
             </div>
         </div>
-        
+
         <div class="empty-message" th:if="${#lists.isEmpty(pendingMembers)}">
             대기중인 신청이 없습니다.
         </div>
@@ -163,21 +205,20 @@
     <!-- 승인된 멤버 -->
     <div class="section">
         <h2 class="section-title">✅ 승인된 멤버 (<span th:text="${#lists.size(approvedMembers)}">0</span>명)</h2>
-        
+
         <div class="member-list" th:if="${!#lists.isEmpty(approvedMembers)}">
-            <div class="member-card" th:each="member : ${approvedMembers}">
+            <div class="approved-member-card" th:each="member : ${approvedMembers}">
                 <div class="member-info">
                     <div class="member-name" th:text="${member.userName}">홍길동</div>
                     <div class="member-detail">
-                        이메일: <span th:text="${member.userEmail}">hong@example.com</span>
-                        <br>
+                        이메일: <span th:text="${member.userEmail}">hong@example.com</span><br>
                         가입일: <span th:text="${member.appliedAt}">2024-01-01 12:00</span>
                     </div>
                 </div>
                 <span class="status-badge status-approved" th:text="${member.status}">승인됨</span>
             </div>
         </div>
-        
+
         <div class="empty-message" th:if="${#lists.isEmpty(approvedMembers)}">
             승인된 멤버가 없습니다.
         </div>

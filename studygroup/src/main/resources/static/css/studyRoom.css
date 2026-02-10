@@ -1,0 +1,85 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* 사이드바 */
+.sidebar {
+    width: 230px;
+    background: #e0e0e0;
+    padding: 20px;
+}
+
+.logo {
+    width: 120px;
+    height: 120px;
+    background: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.study-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* 메인 */
+.main {
+    flex: 1;
+    padding: 30px;
+    background: white;
+}
+
+.top-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.top-buttons button {
+    padding: 8px 14px;
+    background: #ddd;
+    border: none;
+    cursor: pointer;
+}
+
+.notice {
+    border: 2px solid black;
+    border-radius: 20px;
+    padding: 12px 20px;
+    margin: 20px 0;
+}
+
+.post {
+    background: #eee;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.writer {
+    color: #555;
+    font-size: 14px;
+}
+
+.gallery {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.gallery div {
+    width: 150px;
+    height: 100px;
+    background: #ddd;
+}

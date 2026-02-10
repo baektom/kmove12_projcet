@@ -50,13 +50,25 @@
     </a>
   </div>
 
-  <div th:each="study : ${studyList}"
-       style="padding:16px; border-bottom:1px solid #eee; cursor:pointer;"
-       th:onclick="|location.href='@{/study/{id}(id=${study.id})}'|">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <b th:text="${study.title}">제목</b>
+  <div class="study-list" style="margin-top: 10px;">
+    <div th:each="study : ${studyList}" class="study-item"
+         th:onclick="|location.href='@{/study/{id}(id=${study.id})}'|">
+      <a th:href="@{/study/{id}(id=${study.id})}"
+         th:text="${study.title}"
+         class="study-title">스터디 제목</a>
+
+      <div class="study-info">
+            <span class="status-badge"
+                  th:classappend="${study.status == '모집중'} ? 'status-recruiting' : 'status-closed'"
+                  th:text="${study.status}">모집중</span>
+        <span>
+              참여인원
+              <span th:text="${study.currentParticipants}" style="color:#2b56f5; font-weight:bold;">0</span> /
+              <span th:text="${study.maxParticipants}">5</span>
+            </span>
+        <span style="color:#666;">조회수 <b th:text="${study.viewCount}">0</b></span>
+      </div>
     </div>
-  </div>
 
 </main>
 
