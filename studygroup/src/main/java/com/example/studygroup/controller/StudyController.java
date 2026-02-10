@@ -23,6 +23,8 @@ import java.io.File;
 // 페이지로 변경 import문
 import org.springframework.data.domain.Page;
 
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 @Controller
 @RequiredArgsConstructor
 public class StudyController {
