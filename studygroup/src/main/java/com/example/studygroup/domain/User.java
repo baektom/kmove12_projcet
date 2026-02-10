@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder // 빌더 패턴 사용
 @NoArgsConstructor // JPA를 위한 기본 생성자
 @AllArgsConstructor // ⭐ 빌더가 모든 필드를 인식하게 하려면 이게 꼭 필요합니다!
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
