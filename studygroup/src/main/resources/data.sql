@@ -20,5 +20,4 @@ VALUES
     ('Java', CURRENT_TIMESTAMP),
     ('중국어', CURRENT_TIMESTAMP),
     ('토플', CURRENT_TIMESTAMP)
-    ON CONFLICT (name)
-DO UPDATE SET name = EXCLUDED.name;
+    ON DUPLICATE KEY UPDATE name = VALUES(name);
