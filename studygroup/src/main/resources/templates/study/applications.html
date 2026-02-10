@@ -5,145 +5,32 @@
     <title>참가 신청 관리 - STUDY MATE</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 40px;
-        }
-        .page-title {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .study-info {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-        .section {
-            background-color: white;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #2b56f5;
-        }
-        .member-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .member-card {
-            padding: 25px;
-            background-color: #f8f9fa;
-            border-radius: 12px;
-            border: 2px solid #e9ecef;
-        }
-        .member-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-        .member-info {
-            flex: 1;
-        }
-        .member-name {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #333;
-        }
-        .member-detail {
-            color: #666;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-        .application-message {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 4px solid #2b56f5;
-        }
-        .message-label {
-            font-weight: 600;
-            color: #2b56f5;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-        }
-        .message-content {
-            color: #333;
-            line-height: 1.8;
-            white-space: pre-wrap;
-        }
-        .button-group {
-            display: flex;
-            gap: 10px;
-        }
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-approve {
-            background-color: #28a745;
-            color: white;
-        }
-        .btn-approve:hover {
-            background-color: #218838;
-        }
-        .btn-reject {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-reject:hover {
-            background-color: #c82333;
-        }
-        .btn-back {
-            background-color: #6c757d;
-            color: white;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-back:hover {
-            background-color: #5a6268;
-        }
-        .empty-message {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-        .status-approved {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .approved-member-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border: 2px solid #e9ecef;
-        }
+        .container { max-width: 1000px; margin: 40px auto; padding: 40px; }
+        .page-title { font-size: 2rem; font-weight: bold; margin-bottom: 10px; color: #333; }
+        .study-info { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .section { background-color: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .section-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; color: #2b56f5; }
+        .member-list { display: flex; flex-direction: column; gap: 20px; }
+        .member-card { padding: 25px; background-color: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef; }
+        .member-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .member-info { flex: 1; }
+        .member-name { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; color: #333; }
+        .member-detail { color: #666; font-size: 0.95rem; line-height: 1.6; }
+        .application-message { background-color: white; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2b56f5; }
+        .message-label { font-weight: 600; color: #2b56f5; margin-bottom: 10px; font-size: 0.95rem; }
+        .message-content { color: #333; line-height: 1.8; white-space: pre-wrap; }
+        .button-group { display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-approve { background-color: #28a745; color: white; }
+        .btn-approve:hover { background-color: #218838; }
+        .btn-reject { background-color: #dc3545; color: white; }
+        .btn-reject:hover { background-color: #c82333; }
+        .btn-back { background-color: #6c757d; color: white; text-decoration: none; display: inline-block; }
+        .btn-back:hover { background-color: #5a6268; }
+        .empty-message { text-align: center; padding: 40px; color: #999; }
+        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; }
+        .status-approved { background-color: #d4edda; color: #155724; }
+        .approved-member-card { display: flex; justify-content: space-between; align-items: center; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 2px solid #e9ecef; }
     </style>
 </head>
 <body>
@@ -156,7 +43,8 @@
     <div class="study-info">
         <h3 th:text="${study.title}">스터디 제목</h3>
         <p style="color: #666; margin-top: 5px;">
-            참여인원: <strong th:text="${study.currentParticipants}">1</strong> / <span th:text="${study.maxParticipants}">5</span>
+            참여인원: <strong th:text="${study.currentParticipants}">1</strong> /
+            <span th:text="${study.maxParticipants}">5</span>
         </p>
     </div>
 
@@ -165,7 +53,8 @@
         <h2 class="section-title">⏳ 대기중인 신청 (<span th:text="${#lists.size(pendingMembers)}">0</span>건)</h2>
 
         <div class="member-list" th:if="${!#lists.isEmpty(pendingMembers)}">
-            <div class="member-card" th:each="member : ${pendingMembers}">
+            <!-- null 방어 -->
+            <div class="member-card" th:each="member : ${pendingMembers}" th:if="${member != null}">
                 <div class="member-header">
                     <div class="member-info">
                         <div class="member-name" th:text="${member.userName}">홍길동</div>
@@ -184,11 +73,13 @@
                 </div>
 
                 <div class="button-group">
-                    <form th:action="@{/study/member/{memberId}/approve(memberId=${member.id})}" method="post" style="display: inline;">
+                    <!-- ✅ member.id -> member.memberId 로 수정 -->
+                    <form th:action="@{/study/member/{memberId}/approve(memberId=${member.memberId})}" method="post" style="display:inline;">
                         <input type="hidden" name="studyId" th:value="${study.id}">
                         <button type="submit" class="btn btn-approve">✓ 승인</button>
                     </form>
-                    <form th:action="@{/study/member/{memberId}/reject(memberId=${member.id})}" method="post" style="display: inline;">
+
+                    <form th:action="@{/study/member/{memberId}/reject(memberId=${member.memberId})}" method="post" style="display:inline;">
                         <input type="hidden" name="studyId" th:value="${study.id}">
                         <button type="submit" class="btn btn-reject">✗ 거부</button>
                     </form>
@@ -206,7 +97,7 @@
         <h2 class="section-title">✅ 승인된 멤버 (<span th:text="${#lists.size(approvedMembers)}">0</span>명)</h2>
 
         <div class="member-list" th:if="${!#lists.isEmpty(approvedMembers)}">
-            <div class="approved-member-card" th:each="member : ${approvedMembers}">
+            <div class="approved-member-card" th:each="member : ${approvedMembers}" th:if="${member != null}">
                 <div class="member-info">
                     <div class="member-name" th:text="${member.userName}">홍길동</div>
                     <div class="member-detail">
@@ -230,13 +121,3 @@
 
 </body>
 </html>
-<form th:action="@{/study/member/{memberId}/approve(memberId=${member.id})}" method="post" style="display: inline;">
-    <input type="hidden" name="studyId" th:value="${study.id}">
-    <button type="submit" class="btn btn-approve">승인</button>
-</form>
-
-<form th:action="@{/study/member/{memberId}/reject(memberId=${member.id})}" method="post" style="display: inline;">
-    <input type="hidden" name="studyId" th:value="${study.id}">
-    <button type="submit" class="btn btn-reject">거부</button>
-</form>
-
