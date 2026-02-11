@@ -123,7 +123,9 @@ public class UserController {
         if (file.isEmpty()) return "redirect:/mypage/account?error=empty";
 
         try {
-            String uploadDir = "studygroup/src/main/resources/static/uploads/profiles/";
+            // ✅ 1. 저장 경로를 프로젝트 루트의 'uploads' 폴더로 변경 (src 내부 X)
+            // WebMvcConfig에서 설정한 경로와 일치시켜야 합니다.
+            String uploadDir = "uploads/profiles/";
             File directory = new File(uploadDir);
             if (!directory.exists()) directory.mkdirs();
 
@@ -131,13 +133,24 @@ public class UserController {
             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String savedFilename = UUID.randomUUID().toString() + extension;
 
-            Path filePath = Paths.get(uploadDir, savedFilename);
-            Files.write(filePath, file.getBytes());
+            // ✅ 2. 절대 경로로 파일 저장 (transferTo가 더 안전합니다)
+            File dest = new File(directory.getAbsolutePath() + File.separator + savedFilename);
+            file.transferTo(dest);
 
+            // 3. DB 정보 업데이트
             User user = userRepository.findById(loginUserId)
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-            user.updateProfileImage("/uploads/profiles/" + savedFilename);
+
+            String profileUrl = "/uploads/profiles/" + savedFilename;
+            user.updateProfileImage(profileUrl);
             userRepository.save(user);
+
+            // ✅ 4. 중요: 세션 정보 갱신
+            // 만약 헤더나 마이페이지에서 세션에 담긴 유저 정보를 쓰고 있다면,
+            // 여기서 세션 속성도 새 이미지 경로로 업데이트해줘야 즉시 반영됩니다.
+            session.setAttribute("loginUserProfileImage", profileUrl);
+            // 만약 'user' 객체 통째로 세션에 있다면:
+            // session.setAttribute("user", user);
 
             return "redirect:/mypage/account?uploaded=true";
         } catch (IOException e) {

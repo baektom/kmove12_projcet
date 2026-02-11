@@ -149,20 +149,17 @@ public class StudyController {
     // 대문 사진 업로드 헬퍼 메서드
     private String uploadCoverImage(MultipartFile file) {
         try {
-            String uploadDir = "studygroup/src/main/resources/static/uploads/covers/";
+            // ✅ 스터디룸 사진과 똑같이 프로젝트 루트의 'uploads' 폴더 사용
+            String uploadDir = "uploads/covers/";
             File directory = new File(uploadDir);
             if (!directory.exists()) directory.mkdirs();
 
-            String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            String savedFilename = UUID.randomUUID().toString() + extension;
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            file.transferTo(new File(directory.getAbsolutePath() + File.separator + fileName));
 
-            Path filePath = Paths.get(uploadDir, savedFilename);
-            Files.write(filePath, file.getBytes());
-
-            return "/uploads/covers/" + savedFilename;
+            // ✅ DB에 저장할 값: 웹 주소 형식
+            return "/uploads/covers/" + fileName;
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }
