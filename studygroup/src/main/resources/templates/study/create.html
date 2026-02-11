@@ -208,19 +208,27 @@
                 })();
             </script>
 
-            <div class="form-group">
-                <label class="form-label" for="maxParticipants">최대 인원 *</label>
-                <input type="number" id="maxParticipants" name="maxParticipants"
-                       class="form-input form-input-small"
-                       min="2" max="50" th:value="${maxParticipants != null ? maxParticipants : 5}" required>
-                <p class="help-text" style="color: #dc3545;" th:if="${#fields != null && #fields.hasErrors('maxParticipants')}" th:errors="*{maxParticipants}"></p>
-                <p class="help-text">작성자 포함 최소 2명 ~ 최대 50명</p>
-            </div>
+            <form th:action="@{/study/create}" method="post" enctype="multipart/form-data">
 
-            <div class="button-group">
-                <button type="submit" class="btn btn-primary">스터디 만들기</button>
-                <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
-            </div>
+                <div class="form-group">
+                    <label class="form-label" for="maxParticipants">최대 인원 *</label>
+                    <input type="number" id="maxParticipants" name="maxParticipants"
+                           class="form-input form-input-small"
+                           min="2" max="50" th:value="${maxParticipants != null ? maxParticipants : 5}" required>
+
+                    <p class="help-text" style="color: #dc3545;"
+                       th:if="${studyCreateRequest != null and #fields.hasErrors('maxParticipants')}"
+                       th:errors="*{maxParticipants}"></p>
+
+                    <p class="help-text">작성자 포함 최소 2명 ~ 최대 50명</p>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">스터디 만들기</button>
+                    <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+                </div>
+            </form>
+
         </form>
     </div>
 </main>

@@ -32,7 +32,7 @@ public class FileController {
      * 파일 업로드 처리
      */
     @PostMapping("/upload")
-    public String upload(@RequestParam("file") MultipartFile file, Model model) throws Exception {
+    public String upload(@RequestParam("profileImage") MultipartFile file, Model model) throws Exception {
         // 1. 파일 선택 여부 확인
         if (file.isEmpty()) {
             model.addAttribute("error", "파일이 선택되지 않았습니다.");
